@@ -12,6 +12,13 @@ fn write_and_format(out_file: &str, code: &str) {
     .expect("Failed to run cargo fmt");
 }
 
+fn is_no_file<'a>(filepath: &'a str) -> Option<&'a str> {
+  match fs::metadata(filepath).map(|m| m.is_file()).unwrap_or(false) {
+    false => Some(filepath),
+    true => None,
+  }
+}
+
 // MARK: Font Width
 
 fn load_font() -> Font<'static> {
@@ -40,7 +47,7 @@ fn calc_width(font: &Font, text: &str, size: f32) -> f32 {
   width
 }
 
-fn generate_width() {
+fn generate_width(outfile: &str) {
   let font_size = 110.0;
   let font = load_font();
 
@@ -56,7 +63,7 @@ fn generate_width() {
   }
 
   let code = format!("pub static WIDTHS: [f32; 8192] = {:?};", widths);
-  write_and_format("src/width.rs", &code);
+  write_and_format(outfile, &code);
 }
 
 // MARK: Icons
@@ -82,7 +89,7 @@ fn get_files_of_kind(base_dir: &str, kind: &str) -> Vec<String> {
     .collect()
 }
 
-fn generate_icons() {
+fn generate_icons(outfile: &str) {
   let icons: Vec<(String, String)> = get_files_of_kind("vendor/simple-icons/icons", "svg")
     .into_par_iter()
     .map(|x| {
@@ -105,13 +112,21 @@ fn generate_icons() {
     }};",
   );
 
-  write_and_format("src/icons.rs", &code);
+  write_and_format(outfile, &code);
 }
 
 // MARK: Main
 
 fn main() {
   println!("cargo::rerun-if-changed=build.rs");
-  generate_width();
-  generate_icons();
+
+  match is_no_file("src/width.rs") {
+    Some(outfile) => generate_width(outfile),
+    None => {}
+  }
+
+  match is_no_file("src/icons.rs") {
+    Some(outfile) => generate_icons(outfile),
+    None => {}
+  }
 }

@@ -1,3 +1,3 @@
 [submodule "vendor/simple-icons"]
 	path = vendor/simple-icons
-	url = git@github.com:simple-icons/simple-icons.git
+	url = https://github.com/simple-icons/simple-icons.git
