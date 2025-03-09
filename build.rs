@@ -12,7 +12,7 @@ fn write_and_format(out_file: &str, code: &str) {
     .expect("Failed to run cargo fmt");
 }
 
-fn is_no_file<'a>(filepath: &'a str) -> Option<&'a str> {
+fn is_no_file(filepath: &str) -> Option<&str> {
   match fs::metadata(filepath).map(|m| m.is_file()).unwrap_or(false) {
     false => Some(filepath),
     true => None,
@@ -24,8 +24,7 @@ fn is_no_file<'a>(filepath: &'a str) -> Option<&'a str> {
 fn load_font() -> Font<'static> {
   let font_path = "/System/Library/Fonts/Supplemental/Verdana.ttf";
   let font_data = std::fs::read(font_path).expect("Failed to read font file");
-  let font = Font::try_from_vec(font_data).expect("Failed to parse font data");
-  font
+  Font::try_from_vec(font_data).expect("Failed to parse font data")
 }
 
 // https://gitlab.redox-os.org/redox-os/rusttype/-/blob/d2b6874c/dev/examples/image.rs
@@ -39,7 +38,7 @@ fn calc_width(font: &Font, text: &str, size: f32) -> f32 {
   let width = glyphs
     .iter()
     .rev()
-    .map(|g| g.position().x as f32 + g.unpositioned().h_metrics().advance_width)
+    .map(|g| g.position().x + g.unpositioned().h_metrics().advance_width)
     .next()
     .unwrap_or(0.0)
     .ceil();
@@ -62,7 +61,7 @@ fn generate_width(outfile: &str) {
     }
   }
 
-  let code = format!("pub static WIDTHS: [f32; 8192] = {:?};", widths);
+  let code = format!("pub(crate) static WIDTHS: [f32; 8192] = {:?};", widths);
   write_and_format(outfile, &code);
 }
 
@@ -107,7 +106,7 @@ fn generate_icons(outfile: &str) {
     .join("\n");
 
   let code = format!(
-    "pub static ICONS: phf::Map<&'static str, &'static str> = phf::phf_map! {{\n\
+    "pub(crate) static ICONS: phf::Map<&'static str, &'static str> = phf::phf_map! {{\n\
     {code}\n\
     }};",
   );
@@ -120,13 +119,11 @@ fn generate_icons(outfile: &str) {
 fn main() {
   println!("cargo::rerun-if-changed=build.rs");
 
-  match is_no_file("src/width.rs") {
-    Some(outfile) => generate_width(outfile),
-    None => {}
+  if let Some(outfile) = is_no_file("src/badgelib/_width.rs") {
+    generate_width(outfile)
   }
 
-  match is_no_file("src/icons.rs") {
-    Some(outfile) => generate_icons(outfile),
-    None => {}
+  if let Some(outfile) = is_no_file("src/badgelib/_icons.rs") {
+    generate_icons(outfile)
   }
 }

@@ -5,14 +5,9 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{
-  badge::{Badge, DlPeriod},
-  colors::Color,
-  server::{Dict, Rep, Res},
-  utils::to_min_ver,
-};
-
 use super::get_client;
+use crate::badgelib::{Badge, DlPeriod};
+use crate::server::{Dict, Rep, Res};
 
 #[derive(Debug)]
 struct GemData {
@@ -62,6 +57,6 @@ pub async fn handler(
     Kind::Version => Ok(Badge::for_version(&qs, "gem", &rs.version)?),
     Kind::License => Ok(Badge::for_license(&qs, &rs.license)?),
     Kind::Total => Ok(Badge::for_dl(&qs, DlPeriod::Total, rs.dlt)?),
-    Kind::Ruby => Ok(Badge::new("ruby", &to_min_ver(&rs.ruby_ver), Color::Blue)),
+    Kind::Ruby => Ok(Badge::for_min_ver(&qs, "ruby", &rs.ruby_ver)?),
   }
 }

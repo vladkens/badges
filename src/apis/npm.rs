@@ -5,12 +5,9 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{
-  badge::{Badge, DlPeriod},
-  server::{Dict, Rep, Res},
-};
-
 use super::get_client;
+use crate::badgelib::{Badge, DlPeriod};
+use crate::server::{Dict, Rep, Res};
 
 #[derive(Debug)]
 struct NpmData {

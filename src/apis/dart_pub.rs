@@ -4,12 +4,9 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{
-  badge::{Badge, DlPeriod},
-  server::{Dict, Rep, Res},
-};
-
 use super::get_client;
+use crate::badgelib::{Badge, DlPeriod};
+use crate::server::{Dict, Rep, Res};
 
 #[derive(Debug)]
 struct Data {
@@ -52,7 +49,7 @@ async fn get_score(name: &str) -> Res<Score> {
     .map(|x| x[8..].to_string())
     .collect::<Vec<String>>();
 
-  let license = tags.iter().next().unwrap_or(&"unknown".to_string()).to_string();
+  let license = tags.first().unwrap_or(&"unknown".to_string()).to_string();
 
   Ok(Score { dlm, likes, license })
 }

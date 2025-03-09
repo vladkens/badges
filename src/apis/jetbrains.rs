@@ -4,14 +4,9 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{
-  badge::{Badge, DlPeriod},
-  colors::Color,
-  server::{Dict, Rep, Res},
-  utils::render_stars,
-};
-
 use super::get_client;
+use crate::badgelib::{Badge, Color, DlPeriod, utils::render_stars};
+use crate::server::{Dict, Rep, Res};
 
 async fn get_version(name: &str) -> Res<String> {
   let url = format!("https://plugins.jetbrains.com/api/plugins/{name}/updates");

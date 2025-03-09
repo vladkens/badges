@@ -1,18 +1,14 @@
+mod apis;
+mod badgelib;
+mod server;
+
 use axum::{response::IntoResponse, routing::get};
-use colors::Color;
+use badgelib::Color;
 use maud::{Markup, html};
 use serde_variant::to_variant_name;
 use server::Rep;
 use strum::IntoEnumIterator;
 use tracing_subscriber::layer::SubscriberExt;
-
-mod apis;
-mod badge;
-mod colors;
-mod icons;
-mod server;
-mod utils;
-mod width;
 
 fn base(title: &str, node: Markup) -> Markup {
   html!(html {
@@ -205,5 +201,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .route("/badge/{label}/{value}/{color}", get(apis::fixed::handler3))
     .route("/", get(index));
 
-  Ok(server::run_server(app).await?)
+  server::run_server(app).await
 }

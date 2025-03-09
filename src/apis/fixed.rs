@@ -1,15 +1,10 @@
-use std::str::FromStr;
-
 use axum::{
   extract::{Path, Query},
   response::IntoResponse,
 };
 
-use crate::{
-  badge::Badge,
-  colors::Color,
-  server::{Dict, Rep},
-};
+use crate::badgelib::{Badge, Color};
+use crate::server::{Dict, Rep};
 
 pub async fn handler1(Query(qs): Query<Dict>) -> Rep<impl IntoResponse> {
   Ok(Badge::from_qs(&qs)?)

@@ -5,12 +5,9 @@ use axum::{
 use cached::proc_macro::once;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-  badge::{Badge, DlPeriod},
-  server::{Dict, Rep, Res},
-};
-
 use super::get_client;
+use crate::badgelib::{Badge, DlPeriod};
+use crate::server::{Dict, Rep, Res};
 
 #[derive(Debug, Clone)]
 struct Base {
@@ -47,7 +44,7 @@ async fn get_release(name: &str) -> Res<Release> {
   let version = dat["tag_name"].as_str().unwrap_or("unknown").to_string();
   let dlt = dat["assets"]
     .as_array()
-    .and_then(|p| Some(p.iter().filter_map(|x| x["download_count"].as_u64()).sum::<u64>()))
+    .map(|p| p.iter().filter_map(|x| x["download_count"].as_u64()).sum::<u64>())
     .unwrap_or(0);
 
   Ok(Release { version, dlt })

@@ -5,14 +5,9 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-use crate::{
-  badge::Badge,
-  colors::Color,
-  server::{Dict, Rep, Res},
-  utils::millify,
-};
-
 use super::get_client;
+use crate::badgelib::{Badge, Color, utils::millify};
+use crate::server::{Dict, Rep, Res};
 
 #[derive(Debug)]
 struct Data {
@@ -37,8 +32,7 @@ async fn get_data(name: &str) -> Res<Data> {
     let val = dat["statistics"].as_array();
     let val = val.and_then(|arr| arr.iter().find(|x| x["statisticName"] == name));
     let val = val.and_then(|x| x["value"].as_f64());
-    let val = val.map(|x| x as u64).unwrap_or(0);
-    val
+    val.map(|x| x as u64).unwrap_or(0)
   };
 
   let installs = get_stat("install");

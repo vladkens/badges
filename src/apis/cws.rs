@@ -4,14 +4,9 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{
-  badge::Badge,
-  colors::Color,
-  server::{Dict, Rep, Res},
-  utils::render_stars,
-};
-
 use super::get_client;
+use crate::badgelib::{Badge, Color, utils::render_stars};
+use crate::server::{Dict, Rep, Res};
 
 #[derive(Debug)]
 struct Data {
@@ -23,7 +18,7 @@ struct Data {
 
 async fn get_data(name: &str) -> Res<Data> {
   // https://github.com/simov/chrome-webstore/blob/master/client.js
-  let url = format!("https://chrome.google.com/webstore/ajax/detail");
+  let url = "https://chrome.google.com/webstore/ajax/detail";
   let req = get_client().post(url).query(&[("id", name), ("hl", "en"), ("pv", "20210820")]);
   let req = req.body("").header("accept", "*/*").header("content-length", "0").build()?;
   let rep = get_client().execute(req).await?.error_for_status()?;

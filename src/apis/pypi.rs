@@ -5,14 +5,9 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{
-  badge::{Badge, DlPeriod},
-  colors::Color,
-  server::{Dict, Rep, Res},
-  utils::to_ver_label,
-};
-
 use super::get_client;
+use crate::badgelib::{Badge, Color, DlPeriod, utils::to_ver_label};
+use crate::server::{Dict, Rep, Res};
 
 #[derive(Debug)]
 struct PyPiData {
@@ -91,7 +86,6 @@ pub async fn handler(
 
     Kind::Python => {
       let rs = get_data(&name).await?;
-      // Ok(Badge::new("python", &rs.pythons.join(" | ")))
       Ok(Badge::new("python", &to_ver_label(rs.pythons), Color::Blue))
     }
   }

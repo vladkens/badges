@@ -4,13 +4,9 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{
-  badge::Badge,
-  colors::Color,
-  server::{Dict, Rep, Res},
-};
-
 use super::get_client;
+use crate::badgelib::{Badge, Color};
+use crate::server::{Dict, Rep, Res};
 
 #[derive(Debug)]
 struct Data {
@@ -29,14 +25,14 @@ async fn get_data(name: &str) -> Res<Data> {
   let publish_color = dat["publish"]["color"]
     .as_str()
     .and_then(|x| x.strip_prefix("#"))
-    .and_then(|x| x.parse().ok())
+    .and_then(|x| Color::from_str(x).ok())
     .unwrap_or(Color::Default);
 
   let install_pretty = dat["install"]["pretty"].as_str().unwrap_or("unknown").to_string();
   let install_color = dat["install"]["color"]
     .as_str()
     .and_then(|x| x.strip_prefix("#"))
-    .and_then(|x| x.parse().ok())
+    .and_then(|x| Color::from_str(x).ok())
     .unwrap_or(Color::Default);
 
   Ok(Data { publish_pretty, publish_color, install_pretty, install_color })

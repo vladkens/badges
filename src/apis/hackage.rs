@@ -4,12 +4,9 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{
-  badge::Badge,
-  server::{Dict, Rep, Res},
-};
-
 use super::get_client;
+use crate::badgelib::Badge;
+use crate::server::{Dict, Rep, Res};
 
 #[derive(Debug)]
 struct Data {

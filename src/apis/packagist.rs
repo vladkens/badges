@@ -6,14 +6,9 @@ use axum::{
 use semver::Version;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-  badge::{Badge, DlPeriod},
-  colors::Color,
-  server::{Dict, Rep, Res},
-  utils::to_min_ver,
-};
-
 use super::get_client;
+use crate::badgelib::{Badge, DlPeriod};
+use crate::server::{Dict, Rep, Res};
 
 #[derive(Debug)]
 struct PackageData {
@@ -31,7 +26,7 @@ fn parse_versions(
   let obj = obj.iter().filter_map(|(k, val)| {
     let ver = k.strip_prefix("v").unwrap_or(k);
     let ver = Version::parse(ver).ok();
-    ver.and_then(|ver| Some((ver, val)))
+    ver.map(|ver| (ver, val))
   });
   obj.collect::<Vec<_>>()
 }
@@ -47,11 +42,11 @@ async fn get_data(name: &str) -> Res<PackageData> {
   let dlm = dat["downloads"]["monthly"].as_u64().unwrap_or(0);
 
   let vers = dat["versions"].as_object();
-  let mut vers = vers.and_then(|x| Some(parse_versions(x))).unwrap_or(vec![]);
+  let mut vers = vers.map(|x| parse_versions(x)).unwrap_or(vec![]);
   vers.sort_by(|(a, _), (b, _)| b.cmp(a)); // reverse sort by semver
 
   let stub = (Version::new(0, 0, 0), &serde_json::Value::Null);
-  let latest = vers.iter().next().unwrap_or(&stub).1;
+  let latest = vers.first().unwrap_or(&stub).1;
   let version = latest["version"].as_str().unwrap_or("unknown").to_string();
   let license = latest["license"][0].as_str().unwrap_or("unknown").to_string();
   let php_ver = latest["require"]["php"].as_str().unwrap_or("unknown").to_string();
@@ -60,6 +55,7 @@ async fn get_data(name: &str) -> Res<PackageData> {
 }
 
 #[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display)]
+#[allow(clippy::upper_case_acronyms)]
 pub(crate) enum Kind {
   #[serde(rename = "v", alias = "version")]
   Version,
@@ -91,6 +87,6 @@ pub async fn handler(
     }
     Kind::Monthly => Ok(Badge::for_dl(&qs, DlPeriod::Monthly, rs.dlm)?),
     Kind::Total => Ok(Badge::for_dl(&qs, DlPeriod::Total, rs.dlt)?),
-    Kind::PHP => Ok(Badge::new("php", &to_min_ver(&rs.php_ver), Color::Blue)),
+    Kind::PHP => Ok(Badge::for_min_ver(&qs, "php", &rs.php_ver)?),
   }
 }
