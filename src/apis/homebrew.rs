@@ -42,8 +42,8 @@ pub(crate) enum Kind {
   Yearly,
 }
 
-async fn handler(qs: Dict, kind: Kind, chan: &str, name: &str) -> Rep<impl IntoResponse> {
-  let rs = get_data(chan, name).await?;
+async fn handler(qs: Dict, kind: Kind, chan: &str, name: String) -> Rep<impl IntoResponse> {
+  let rs = get_data(chan, &name).await?;
 
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "homebrew", &rs.version)?),
@@ -56,12 +56,12 @@ pub async fn formula_handler(
   Path((kind, name)): Path<(Kind, String)>,
   Query(qs): Query<Dict>,
 ) -> Rep<impl IntoResponse> {
-  handler(qs, kind, "formula", &name).await
+  handler(qs, kind, "formula", name).await
 }
 
 pub async fn cask_handler(
   Path((kind, name)): Path<(Kind, String)>,
   Query(qs): Query<Dict>,
 ) -> Rep<impl IntoResponse> {
-  handler(qs, kind, "cask", &name).await
+  handler(qs, kind, "cask", name).await
 }

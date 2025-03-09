@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use axum::{
+  Json, ServiceExt,
   extract::Request,
-  http::{header, StatusCode},
+  http::{StatusCode, header},
   response::{IntoResponse, Response},
   routing::get,
-  Json, ServiceExt,
 };
 use tokio::net::TcpListener;
 use tower_http::normalize_path::NormalizePathLayer;

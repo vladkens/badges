@@ -1,5 +1,5 @@
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-use rusttype::{point, Font, Scale};
+use rusttype::{Font, Scale, point};
 use std::fs;
 
 fn write_and_format(out_file: &str, code: &str) {

@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
-use axum::http::{header, StatusCode};
+use axum::http::{StatusCode, header};
 use axum::response::{IntoResponse, Response};
-use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
+use base64::prelude::BASE64_STANDARD;
 use maud::html;
 
 use crate::colors::Color;

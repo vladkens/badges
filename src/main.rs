@@ -1,6 +1,6 @@
 use axum::{response::IntoResponse, routing::get};
 use colors::Color;
-use maud::{html, Markup};
+use maud::{Markup, html};
 use serde_variant::to_variant_name;
 use server::Rep;
 use strum::IntoEnumIterator;
