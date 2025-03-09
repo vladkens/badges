@@ -26,14 +26,14 @@ async fn get_data(name: &str) -> Res<Data> {
     .as_str()
     .and_then(|x| x.strip_prefix("#"))
     .and_then(|x| Color::from_str(x).ok())
-    .unwrap_or(Color::Default);
+    .unwrap_or(Color::DefaultValue);
 
   let install_pretty = dat["install"]["pretty"].as_str().unwrap_or("unknown").to_string();
   let install_color = dat["install"]["color"]
     .as_str()
     .and_then(|x| x.strip_prefix("#"))
     .and_then(|x| Color::from_str(x).ok())
-    .unwrap_or(Color::Default);
+    .unwrap_or(Color::DefaultValue);
 
   Ok(Data { publish_pretty, publish_color, install_pretty, install_color })
 }

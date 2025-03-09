@@ -160,6 +160,37 @@ async fn index() -> Rep<impl IntoResponse> {
   Ok(base("badges.ws", html))
 }
 
+async fn debug() -> Rep<impl IntoResponse> {
+  let items = [
+    "/badge/Value-red",
+    "/badge/Value-Value-red",
+    "/badge/Value-Value-07C160?logo=wechat&logoColor=white",
+    "/badge/Value-07C160?logo=wechat&logoColor=white",
+    "/badge/Value-07C160?logo=wechat&labelColor=red&logoColor=white",
+    "/badge/Buy_me_a_coffee-ff813f?logo=buymeacoffee&logoColor=white",
+    "/pypi/dm/twscrape",
+    "/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079",
+    "/badge/Open_in_DevExpress-FF7200?style=flat-square&logo=DevExpress&logoColor=white",
+  ];
+
+  let icls = "mb-0 h-[62px]";
+
+  let html = html!({
+    div class="flex flex-col gap-2 items-center" {
+      table class="w-[1280px]" {
+        @for item in items {
+          tr {
+            td { img class=(icls) src=(format!("https://img.shields.io{item}")) {} }
+            td { img class=(icls) src=(format!("{item}")) {} }
+          }
+        }
+      }
+    }
+  });
+
+  Ok(base("badges.ws", html))
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
   let env_filter = tracing_subscriber::EnvFilter::builder()
@@ -199,7 +230,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .route("/badge", get(apis::fixed::handler1))
     .route("/badge/{config}", get(apis::fixed::handler2))
     .route("/badge/{label}/{value}/{color}", get(apis::fixed::handler3))
-    .route("/", get(index));
+    .route("/", get(index))
+    .route("/debug", get(debug));
 
   server::run_server(app).await
 }

@@ -30,24 +30,15 @@ fn load_font() -> Font<'static> {
 // https://gitlab.redox-os.org/redox-os/rusttype/-/blob/d2b6874c/dev/examples/image.rs
 // https://gitlab.redox-os.org/redox-os/rusttype/-/blob/d2b6874c/dev/examples/ascii.rs
 fn calc_width(font: &Font, text: &str, size: f32) -> f32 {
-  let scale = Scale { x: size * 1.25, y: size };
-  let v_metrics = font.v_metrics(scale);
-  let offset = point(0.0, v_metrics.ascent);
-  let glyphs: Vec<_> = font.layout(text, scale, offset).collect();
-
-  let width = glyphs
-    .iter()
-    .rev()
+  font
+    .layout(text, Scale { x: size * 1.25, y: size }, point(0.0, 0.0))
     .map(|g| g.position().x + g.unpositioned().h_metrics().advance_width)
-    .next()
+    .last()
     .unwrap_or(0.0)
-    .ceil();
-
-  width
 }
 
 fn generate_width(outfile: &str) {
-  let font_size = 110.0;
+  let size = 110.0;
   let font = load_font();
 
   let mut widths: Vec<f32> = vec![];
@@ -56,7 +47,7 @@ fn generate_width(outfile: &str) {
       widths.push(0.0);
     } else {
       let ch = char::from_u32(x).unwrap();
-      let cw = calc_width(&font, &ch.to_string(), font_size);
+      let cw = calc_width(&font, &ch.to_string(), size);
       widths.push(cw);
     }
   }
@@ -118,6 +109,9 @@ fn generate_icons(outfile: &str) {
 
 fn main() {
   println!("cargo::rerun-if-changed=build.rs");
+
+  // generate_width("src/badgelib/_width.rs");
+  // generate_icons("src/badgelib/_icons.rs");
 
   if let Some(outfile) = is_no_file("src/badgelib/_width.rs") {
     generate_width(outfile)

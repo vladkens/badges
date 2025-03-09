@@ -49,10 +49,10 @@ pub async fn handler(
     Kind::Version => Ok(Badge::for_version(&qs, "jetbrain plugin", &get_version(&name).await?)?),
     Kind::Total => Ok(Badge::for_dl(&qs, DlPeriod::Total, get_dlt(&name).await?)?),
     Kind::Score => {
-      Ok(Badge::new("score", &format!("{:.1}/5", get_score(&name).await?), Color::Default))
+      Ok(Badge::new("score", &format!("{:.1}/5", get_score(&name).await?), Color::DefaultValue))
     }
     Kind::Stars => {
-      Ok(Badge::new("stars", &render_stars(get_score(&name).await?, 5.0), Color::Default))
+      Ok(Badge::new("stars", &render_stars(get_score(&name).await?, 5.0), Color::DefaultValue))
     }
   }
 }

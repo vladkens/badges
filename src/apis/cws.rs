@@ -55,8 +55,8 @@ pub async fn handler(
   let rs = get_data(&name).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "chrome web store", &rs.version)?),
-    Kind::Users => Ok(Badge::new("users", &rs.users, Color::Default)),
-    Kind::Score => Ok(Badge::new("score", &format!("{:.1}/5", rs.score), Color::Default)),
-    Kind::Stars => Ok(Badge::new("stars", &render_stars(rs.score, 5.0), Color::Default)),
+    Kind::Users => Ok(Badge::new("users", &rs.users, Color::DefaultValue)),
+    Kind::Score => Ok(Badge::new("score", &format!("{:.1}/5", rs.score), Color::DefaultValue)),
+    Kind::Stars => Ok(Badge::new("stars", &render_stars(rs.score, 5.0), Color::DefaultValue)),
   }
 }

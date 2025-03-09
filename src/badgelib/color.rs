@@ -1,10 +1,11 @@
 use serde::{Deserialize, Deserializer};
 
 // From: https://github.com/badgen/badgen/blob/master/src/color-presets.ts
-#[derive(Debug, Default, strum::EnumIter)]
+#[derive(Debug, PartialEq, Clone, Default, strum::EnumIter)]
 pub enum Color {
+  DefaultLabel,
   #[default]
-  Default,
+  DefaultValue,
   Green,
   Blue,
   Red,
@@ -21,7 +22,8 @@ pub enum Color {
 impl Color {
   pub fn to_hex(&self) -> String {
     match self {
-      Color::Default => "08C",
+      Color::DefaultLabel => "555",
+      Color::DefaultValue => "08C",
       Color::Green => "3C1",
       Color::Blue => "08C",
       Color::Red => "E43",
@@ -43,7 +45,8 @@ impl Color {
 
   pub fn to_name(&self) -> Option<String> {
     match self {
-      Color::Default => None,
+      Color::DefaultLabel => None,
+      Color::DefaultValue => None,
       Color::Green => Some("green".to_string()),
       Color::Blue => Some("blue".to_string()),
       Color::Red => Some("red".to_string()),
@@ -100,26 +103,8 @@ impl Color {
 }
 
 impl<'de> Deserialize<'de> for Color {
-  fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-  where
-    D: Deserializer<'de>,
-  {
+  fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
     let s = String::deserialize(deserializer)?;
-
-    match s.to_lowercase().as_str() {
-      "default" => Ok(Color::Default),
-      "green" => Ok(Color::Green),
-      "blue" => Ok(Color::Blue),
-      "red" => Ok(Color::Red),
-      "yellow" => Ok(Color::Yellow),
-      "orange" => Ok(Color::Orange),
-      "purple" => Ok(Color::Purple),
-      "pink" => Ok(Color::Pink),
-      "grey" | "gray" => Ok(Color::Grey), // Supporting aliases
-      "cyan" => Ok(Color::Cyan),
-      "black" => Ok(Color::Black),
-      _ if s.starts_with('#') || s.len() == 6 || s.len() == 8 => Ok(Color::Hex(s)),
-      _ => Err(serde::de::Error::custom(format!("Invalid color: {}", s))),
-    }
+    Self::from_str(&s).map_err(serde::de::Error::custom)
   }
 }

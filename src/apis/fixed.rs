@@ -29,7 +29,7 @@ pub async fn handler2(
   let parts = config.split('-').collect::<Vec<&str>>();
 
   let (label, value, color) = match parts.len() {
-    1 => ("", parts[0], Color::Default),
+    1 => ("", parts[0], Color::DefaultValue),
     2 => ("", parts[0], Color::from_str(parts[1]).unwrap_or_default()),
     3 => (parts[0], parts[1], Color::from_str(parts[2]).unwrap_or_default()),
     _ => return Err(anyhow::anyhow!("Invalid config: {}", config).into()),
@@ -43,7 +43,7 @@ pub async fn handler2(
   badge.label = Some(label.to_string());
   badge.value = value.to_string();
   badge.value_color = match badge.value_color {
-    Color::Default => color,
+    Color::DefaultValue => color,
     _ => badge.value_color,
   };
 
@@ -62,7 +62,7 @@ pub async fn handler3(
   badge.label = Some(label.to_string());
   badge.value = value.to_string();
   badge.value_color = match badge.value_color {
-    Color::Default => color,
+    Color::DefaultValue => color,
     _ => badge.value_color,
   };
 
