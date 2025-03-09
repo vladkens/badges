@@ -5,6 +5,11 @@
   "[toml]": {
     "editor.defaultFormatter": "tamasfe.even-better-toml"
   },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 99
+  },  
   "editor.formatOnSave": true,
   "files.exclude": { "Cargo.lock": true, "target": true },
   "evenBetterToml.formatter.columnWidth": 100,

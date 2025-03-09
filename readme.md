@@ -1,6 +1,15 @@
 # badges.ws
 
-Simple badges generator for your repos written in Rust. Inspired by [shields.io](https://github.com/badges/shields) & [badgen.net](https://github.com/badgen/badgen.net).
+Badges.ws is a modern, Rust-based badge generation service inspired by [Shields.io](https://github.com/badges/shields) and [Badgen.net](https://github.com/badgen/badgen.net). It offers a simpler, more efficient codebase with up-to-date integrations, self-hosting capabilities, and low memory consumption. Additionally, it incorporates API-level data caching on top of control-cache headers.
+
+## Why Badges.ws?
+
+- 🚀 **Rust-based**: Modern, efficient, and safe codebase.
+- 🆕 **Newer Codebase**: Simplified and more maintainable.
+- 🔄 **Up-to-date Integrations**: Supports the latest platforms and services.
+- 🏠 **Self-hosted**: Easily deployable on your own infrastructure.
+- 💾 **Low Memory Usage**: Optimized for minimal resource consumption.
+- 📦 **API Caching**: Reduces load and improves performance.
 
 ## Integrations
 
@@ -30,3 +39,33 @@ Simple badges generator for your repos written in Rust. Inspired by [shields.io]
 - [x] GitHub
 - [ ] GitLab
 - [ ] Docker Hub
+
+## Usage
+
+To generate a badge, use the following URL format:
+
+```sh
+https://badges.ws/badge/{label}-{message}-{color}
+```
+
+For more examples and options, visit [badges.ws](https://badges.ws).
+
+## Self-hosted Solution
+
+Badges.ws can be easily self-hosted using Docker. Run the following command:
+
+```sh
+docker run -d -p 8080:80 ghcr.io/vladkens/badges:latest
+```
+
+## Contributing
+
+PRs and issues are welcome! Feel free to request new endpoints, services, or features.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](/LICENSE) file for details.
+
+---
+
+Made with 🍆 by the Badges.ws team.
