@@ -10,6 +10,8 @@ lint:
 
 update:
 	git submodule update --init --recursive
+	git submodule foreach 'git fetch --tags && git checkout $(git describe --tags)'
+	rm -rf src/badgelib/_icons.rs src/badgelib/_width.rs
 	cargo upgrade -i
 
 deploy:

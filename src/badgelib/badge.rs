@@ -22,12 +22,18 @@ fn color_or(val: Option<String>, default: Color) -> Color {
 }
 
 fn get_icon(name: &str, color: &str) -> Option<String> {
-  let name = name.to_lowercase();
-  let icon = ICONS.get(&name)?;
+  let pretenders = [
+    name.to_lowercase(),
+    name.to_lowercase().replace('-', "").replace("!", "").replace("_", "").replace(" ", ""),
+    name.to_lowercase().replace('.', "dot").replace("+", "plus"),
+  ];
+
+  let icon = pretenders.iter().find_map(|n| ICONS.get(n))?;
   let icon = format!(
     r#"<svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="0 0 24 24" fill="{}"><path d="{}" /></svg>"#,
     color, icon
   );
+
   Some(format!("data:image/svg+xml;base64,{}", BASE64_STANDARD.encode(icon)))
 }
 
@@ -99,7 +105,7 @@ impl Badge {
     let icon_color = color_or(icon_color, Color::Hex("fff".to_string()));
 
     let style = BadgeStyle::parse(qs.get("style").unwrap_or(&"flat".to_string()));
-    let radius_default = if style == BadgeStyle::Flat { 4 } else { 0 };
+    let radius_default = if style == BadgeStyle::Flat { 3 } else { 0 };
     let radius = qs.get("radius").and_then(|v| v.parse::<u8>().ok()).unwrap_or(radius_default);
     let radius = radius.min(12);
 
@@ -197,14 +203,14 @@ impl Badge {
     let icon = self.icon.as_deref().unwrap_or_default();
     let icon = get_icon(icon, &self.icon_color.to_css());
 
-    let ltext = self.label.clone().unwrap_or("".to_string());
-    let rtext = self.value.trim().to_string();
-    let rtext = if rtext.is_empty() { "unknown".to_string() } else { rtext };
+    let ltext = self.label.clone().map(|s| s.trim().to_string()).unwrap_or_default();
+    let rtext = self.value.clone().trim().to_string();
     let (has_text, has_icon) = (!ltext.is_empty(), icon.is_some());
 
     #[allow(clippy::nonminimal_bool)]
     let mono = (!has_text && !has_icon)
-      || (has_icon && !has_text && self.label_color == Color::DefaultLabel);
+      || (has_icon && !has_text && self.label_color == Color::DefaultLabel)
+      || (ltext.is_empty() && rtext.is_empty());
 
     let fz = 110.0;
     let ltw = cacl_width(&ltext);
@@ -218,7 +224,7 @@ impl Badge {
 
     if mono {
       rx = if has_icon { pad + iw + gap } else { pad };
-      rw = rx + rtw + pad;
+      rw = if rtext.is_empty() { rx - gap + pad } else { rx + rtw + gap };
     } else {
       lx = if has_icon { pad + iw + gap } else { pad };
       lw = if has_text { lx + ltw + gap } else { lx };
@@ -228,10 +234,10 @@ impl Badge {
 
     let (w, h) = (lw + rw, fz * 1.75);
     let y = h * 0.56;
-    let off = fz / 12.0;
 
-    let title = if has_text { &format!("{ltext}: {rtext}") } else { &rtext };
-    let radius = off * self.radius as f32;
+    let title = if has_text { format!("{ltext}: {rtext}") } else { format!("{rtext}") };
+    let radius = (fz / 12.0) * self.radius as f32;
+    let (outx, outy) = (fz * 0.1 / 2.0, fz * 0.1);
 
     let svg = html!(svg xmlns="http://www.w3.org/2000/svg"
       viewBox=(format!("0 0 {} {}", w, h))
@@ -265,10 +271,10 @@ impl Badge {
         text-anchor="start" dominant-baseline="middle" text-rendering="geometricPrecision"
       {
         @if has_text {
-          text textLength=(ltw) x=(lx) y=(y+off) fill="#000" opacity="0.25" { (&ltext) }
+          text textLength=(ltw) x=(lx+outx) y=(y+outy) fill="#000" opacity="0.25" { (&ltext) }
           text textLength=(ltw) x=(lx) y=(y) { (&ltext) }
         }
-        text textLength=(rtw) x=(rx) y=(y+off) fill="#000" opacity="0.25" { (&rtext) }
+        text textLength=(rtw) x=(rx+outx) y=(y+outy) fill="#000" opacity="0.25" { (&rtext) }
         text textLength=(rtw) x=(rx) y=(y) { (&rtext) }
       }
     });

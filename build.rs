@@ -109,9 +109,8 @@ fn generate_icons(outfile: &str) {
 
 fn main() {
   println!("cargo::rerun-if-changed=build.rs");
-
-  // generate_width("src/badgelib/_width.rs");
-  // generate_icons("src/badgelib/_icons.rs");
+  println!("cargo::rerun-if-changed=src/badgelib/_width.rs");
+  println!("cargo::rerun-if-changed=src/badgelib/_icons.rs");
 
   if let Some(outfile) = is_no_file("src/badgelib/_width.rs") {
     generate_width(outfile)

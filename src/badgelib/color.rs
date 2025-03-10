@@ -80,7 +80,8 @@ impl Color {
 
   // "impl FromStr for Color" are stupid becase require to import "std::str::FromStr" everywhere
   pub fn from_str(s: &str) -> Result<Self, &'static str> {
-    match s.to_lowercase().as_ref() {
+    let s = s.to_lowercase().trim().replace("#", "");
+    match s.as_ref() {
       "green" => Ok(Color::Green),
       "blue" => Ok(Color::Blue),
       "red" => Ok(Color::Red),

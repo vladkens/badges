@@ -25,7 +25,7 @@ pub async fn handler2(
   const TOKEN_DASH: &str = "<DASH>";
 
   let config = config.replace("__", TOKEN_UNDER).replace("--", TOKEN_DASH);
-  let config = config.replace("_", " ").replace("%20", " ").replace("+", " ");
+  let config = config.replace("_", " ").replace("%20", " ");
   let parts = config.split('-').collect::<Vec<&str>>();
 
   let (label, value, color) = match parts.len() {
@@ -40,7 +40,7 @@ pub async fn handler2(
   // println!(">> {:?} {:?} {:?}", label, value, color);
 
   let mut badge = Badge::from_qs(&qs)?;
-  badge.label = Some(label.to_string());
+  badge.label = if label.is_empty() { badge.label } else { Some(label.to_string()) };
   badge.value = value.to_string();
   badge.value_color = match badge.value_color {
     Color::DefaultValue => color,
