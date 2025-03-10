@@ -235,7 +235,7 @@ impl Badge {
     let (w, h) = (lw + rw, fz * 1.75);
     let y = h * 0.56;
 
-    let title = if has_text { format!("{ltext}: {rtext}") } else { format!("{rtext}") };
+    let title = if has_text { format!("{ltext}: {rtext}") } else { rtext.to_string() };
     let radius = (fz / 12.0) * self.radius as f32;
     let (outx, outy) = (fz * 0.1 / 2.0, fz * 0.1);
 
