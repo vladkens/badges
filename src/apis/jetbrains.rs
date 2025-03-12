@@ -1,12 +1,9 @@
-use axum::{
-  extract::{Path, Query},
-  response::IntoResponse,
-};
+use axum::extract::{Path, Query};
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, Color, DlPeriod, utils::render_stars};
-use crate::server::{Dict, Rep, Res};
+use crate::server::{BadgeRep, Dict, Res};
 
 async fn get_version(name: &str) -> Res<String> {
   let url = format!("https://plugins.jetbrains.com/api/plugins/{name}/updates");
@@ -41,10 +38,7 @@ pub(crate) enum Kind {
   Stars,
 }
 
-pub async fn handler(
-  Path((kind, name)): Path<(Kind, String)>,
-  Query(qs): Query<Dict>,
-) -> Rep<impl IntoResponse> {
+pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "jetbrain plugin", &get_version(&name).await?)?),
     Kind::Total => Ok(Badge::for_dl(&qs, DlPeriod::Total, get_dlt(&name).await?)?),

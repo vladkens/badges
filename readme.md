@@ -1,5 +1,11 @@
 # badges.ws
 
+<img src="assets/favicon.svg" align="right" width="128" />
+
+[<img src="https://badges.ws/github/license/vladkens/badges" />](https://github.com/vladkens/badges/blob/main/LICENSE)
+[<img src="https://badges.ws/badge/Powered_by_Fly.io-24175B?logo=flydotio&logoColor=fff" />](https://fly.io)
+[<img src="https://badges.ws/badge/-/buy%20me%20a%20coffee/ff813f?icon=buymeacoffee&label" alt="donate" />](https://buymeacoffee.com/vladkens)
+
 Badges.ws is a modern, Rust-based badge generation service inspired by [Shields.io](https://github.com/badges/shields) and [Badgen.net](https://github.com/badgen/badgen.net). It offers a simpler, more efficient codebase with up-to-date integrations, self-hosting capabilities, and low memory consumption. Additionally, it incorporates API-level data caching on top of control-cache headers.
 
 ## Why Badges.ws?

@@ -1,14 +1,11 @@
 use anyhow::anyhow;
-use axum::{
-  extract::{Path, Query},
-  response::IntoResponse,
-};
+use axum::extract::{Path, Query};
 use semver::Version;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, DlPeriod};
-use crate::server::{Dict, Rep, Res};
+use crate::server::{BadgeRep, Dict, Res};
 
 #[derive(Debug)]
 struct PackageData {
@@ -74,7 +71,7 @@ pub(crate) enum Kind {
 pub async fn handler(
   Path((kind, project)): Path<(Kind, String)>,
   Query(qs): Query<Dict>,
-) -> Rep<impl IntoResponse> {
+) -> BadgeRep {
   let rs = get_data(&project).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "packagist", &rs.version)?),

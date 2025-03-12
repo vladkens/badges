@@ -1,13 +1,10 @@
 use anyhow::anyhow;
-use axum::{
-  extract::{Path, Query},
-  response::IntoResponse,
-};
+use axum::extract::{Path, Query};
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, Color, DlPeriod, utils::to_ver_label};
-use crate::server::{Dict, Rep, Res};
+use crate::server::{BadgeRep, Dict, Res};
 
 #[derive(Debug)]
 struct PyPiData {
@@ -73,10 +70,7 @@ pub(crate) enum Kind {
   Python,
 }
 
-pub async fn handler(
-  Path((kind, name)): Path<(Kind, String)>,
-  Query(qs): Query<Dict>,
-) -> Rep<impl IntoResponse> {
+pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "pypi", &get_data(&name).await?.version)?),
     Kind::License => Ok(Badge::for_license(&qs, &get_data(&name).await?.license)?),

@@ -1,14 +1,11 @@
 use std::str;
 
-use axum::{
-  extract::{Path, Query},
-  response::IntoResponse,
-};
+use axum::extract::{Path, Query};
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, DlPeriod};
-use crate::server::{Dict, Rep, Res};
+use crate::server::{BadgeRep, Dict, Res};
 
 #[derive(Debug)]
 struct Data {
@@ -37,10 +34,7 @@ pub(crate) enum Kind {
   Total,
 }
 
-pub async fn handler(
-  Path((kind, name)): Path<(Kind, String)>,
-  Query(qs): Query<Dict>,
-) -> Rep<impl IntoResponse> {
+pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
   let rs = get_dl(&name).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "nuget", &rs.version)?),

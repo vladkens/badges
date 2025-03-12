@@ -1,13 +1,13 @@
-use axum::{
-  extract::{Path, Query},
-  response::IntoResponse,
-};
+use axum::extract::{Path, Query};
 use cached::proc_macro::once;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::badgelib::{Badge, DlPeriod};
-use crate::server::{Dict, Rep, Res};
+use crate::server::{Dict, Res};
+use crate::{
+  badgelib::{Badge, DlPeriod},
+  server::BadgeRep,
+};
 
 #[derive(Debug, Clone)]
 struct Base {
@@ -64,10 +64,7 @@ pub(crate) enum Kind {
   Forks,
 }
 
-pub async fn handler(
-  Path((kind, name)): Path<(Kind, String)>,
-  Query(qs): Query<Dict>,
-) -> Rep<impl IntoResponse> {
+pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
   match kind {
     Kind::Release => Ok(Badge::for_version(&qs, "release", &get_release(&name).await?.version)?),
     Kind::AssetsDl => Ok(Badge::for_dl(&qs, DlPeriod::Total, get_release(&name).await?.dlt)?),

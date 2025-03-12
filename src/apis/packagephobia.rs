@@ -1,12 +1,9 @@
-use axum::{
-  extract::{Path, Query},
-  response::IntoResponse,
-};
+use axum::extract::{Path, Query};
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, Color};
-use crate::server::{Dict, Rep, Res};
+use crate::server::{BadgeRep, Dict, Res};
 
 #[derive(Debug)]
 struct Data {
@@ -46,10 +43,7 @@ pub(crate) enum Kind {
   Install,
 }
 
-pub async fn handler(
-  Path((kind, name)): Path<(Kind, String)>,
-  Query(qs): Query<Dict>,
-) -> Rep<impl IntoResponse> {
+pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
   // Add '@' if it's a scoped package
   let name = if name.contains("/") && !name.starts_with('@') { format!("@{}", name) } else { name };
   let rs = get_data(&name).await?;

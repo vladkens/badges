@@ -1,12 +1,9 @@
-use axum::{
-  extract::{Path, Query},
-  response::IntoResponse,
-};
+use axum::extract::{Path, Query};
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, DlPeriod};
-use crate::server::{Dict, Rep, Res};
+use crate::server::{BadgeRep, Dict, Res};
 
 #[derive(Debug)]
 struct Data {
@@ -39,7 +36,7 @@ pub(crate) enum Kind {
   Yearly,
 }
 
-async fn handler(qs: Dict, kind: Kind, chan: &str, name: String) -> Rep<impl IntoResponse> {
+async fn handler(qs: Dict, kind: Kind, chan: &str, name: String) -> BadgeRep {
   let rs = get_data(chan, &name).await?;
 
   match kind {
@@ -52,13 +49,13 @@ async fn handler(qs: Dict, kind: Kind, chan: &str, name: String) -> Rep<impl Int
 pub async fn formula_handler(
   Path((kind, name)): Path<(Kind, String)>,
   Query(qs): Query<Dict>,
-) -> Rep<impl IntoResponse> {
+) -> BadgeRep {
   handler(qs, kind, "formula", name).await
 }
 
 pub async fn cask_handler(
   Path((kind, name)): Path<(Kind, String)>,
   Query(qs): Query<Dict>,
-) -> Rep<impl IntoResponse> {
+) -> BadgeRep {
   handler(qs, kind, "cask", name).await
 }

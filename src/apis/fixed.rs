@@ -1,19 +1,13 @@
-use axum::{
-  extract::{Path, Query},
-  response::IntoResponse,
-};
+use axum::extract::{Path, Query};
 
 use crate::badgelib::{Badge, Color};
-use crate::server::{Dict, Rep};
+use crate::server::{BadgeRep, Dict};
 
-pub async fn handler1(Query(qs): Query<Dict>) -> Rep<impl IntoResponse> {
+pub async fn handler1(Query(qs): Query<Dict>) -> BadgeRep {
   Ok(Badge::from_qs(&qs)?)
 }
 
-pub async fn handler2(
-  Path(config): Path<String>,
-  Query(qs): Query<Dict>,
-) -> Rep<impl IntoResponse> {
+pub async fn handler2(Path(config): Path<String>, Query(qs): Query<Dict>) -> BadgeRep {
   // Label, message and color separated by a dash -. For example: `label-message-color`
   // Message and color only, separated by a dash -. For example: `just%20the%20message-8A2BE2`
   // Rules:
@@ -53,7 +47,7 @@ pub async fn handler2(
 pub async fn handler3(
   Path((label, value, color)): Path<(String, String, Color)>,
   Query(qs): Query<Dict>,
-) -> Rep<impl IntoResponse> {
+) -> BadgeRep {
   let label = qs.get("label").unwrap_or(&label);
   let value = qs.get("value").unwrap_or(&value);
   let color = qs.get("color").map_or(color, |x| Color::from_str(x).unwrap_or_default());

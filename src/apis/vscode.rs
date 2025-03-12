@@ -1,13 +1,10 @@
-use axum::{
-  extract::{Path, Query},
-  response::IntoResponse,
-};
+use axum::extract::{Path, Query};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use super::get_client;
 use crate::badgelib::{Badge, Color, utils::millify};
-use crate::server::{Dict, Rep, Res};
+use crate::server::{BadgeRep, Dict, Res};
 
 #[derive(Debug)]
 struct Data {
@@ -52,10 +49,7 @@ pub(crate) enum Kind {
   Downloads,
 }
 
-pub async fn handler(
-  Path((kind, name)): Path<(Kind, String)>,
-  Query(qs): Query<Dict>,
-) -> Rep<impl IntoResponse> {
+pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
   let rs = get_data(&name).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "vscode", &rs.version)?),

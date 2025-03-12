@@ -3,32 +3,64 @@ use std::collections::HashMap;
 use axum::{
   Json, ServiceExt,
   extract::Request,
-  http::{StatusCode, header},
+  http::{StatusCode, Uri, header},
   response::{IntoResponse, Response},
   routing::get,
 };
+use rust_embed::Embed;
 use tokio::net::TcpListener;
 use tower_http::normalize_path::NormalizePathLayer;
 use tower_layer::Layer;
 use tracing::Level;
 
+use crate::badgelib::{Badge, Color};
+
 pub type Res<T = ()> = anyhow::Result<T>;
-pub type Rep<T> = std::result::Result<T, AppError>;
 pub type Dict = HashMap<String, String>;
 
-pub struct AppError(anyhow::Error);
+// MARK: AppError
 
-impl IntoResponse for AppError {
-  fn into_response(self) -> Response {
-    (StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong: {}", self.0)).into_response()
-  }
-}
+pub struct AppError(anyhow::Error);
+pub type AnyRep<T> = std::result::Result<T, AppError>;
 
 impl<E: Into<anyhow::Error>> From<E> for AppError {
   fn from(err: E) -> Self {
     Self(err.into())
   }
 }
+
+impl IntoResponse for AppError {
+  fn into_response(self) -> Response {
+    println!(">> 111");
+    (StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong: {}", self.0)).into_response()
+  }
+}
+
+// MARK: BadgeError
+
+pub struct BadgeError(anyhow::Error);
+pub type BadgeRep = std::result::Result<Badge, BadgeError>;
+
+impl<E: Into<anyhow::Error>> From<E> for BadgeError {
+  fn from(err: E) -> Self {
+    Self(err.into())
+  }
+}
+
+impl IntoResponse for BadgeError {
+  fn into_response(self) -> Response {
+    let e = self.0;
+    if e.downcast_ref::<reqwest::Error>().is_some() {
+      let e = e.downcast_ref::<reqwest::Error>().unwrap();
+      let value = e.status().map(|s| s.to_string()).unwrap_or("api error".into());
+      return Badge::new("error", &value, Color::Red).into_response();
+    }
+
+    Badge::new("error", "unknown", Color::Red).into_response()
+  }
+}
+
+// Other functions
 
 // https://github.com/tokio-rs/axum/discussions/1894
 async fn shutdown_signal() {
@@ -66,6 +98,25 @@ async fn favicon() -> impl IntoResponse {
   (StatusCode::OK, [(header::CONTENT_TYPE, "image/x-icon")], bytes)
 }
 
+#[derive(Embed)]
+#[folder = "assets"]
+struct Asset;
+
+async fn static_handler(uri: Uri) -> impl IntoResponse {
+  let mut path = uri.path().trim_start_matches('/').to_string();
+  if path.starts_with("assets/") {
+    path = path.replace("assets/", "");
+  }
+
+  match Asset::get(path.as_str()) {
+    Some(content) => {
+      let mime = mime_guess::from_path(path).first_or_octet_stream();
+      ([(header::CONTENT_TYPE, mime.as_ref())], content.data).into_response()
+    }
+    None => not_found().await.into_response(),
+  }
+}
+
 pub async fn run_server(app: axum::Router) -> Result<(), Box<dyn std::error::Error>> {
   let app = app
     .layer(
@@ -75,6 +126,7 @@ pub async fn run_server(app: axum::Router) -> Result<(), Box<dyn std::error::Err
     )
     .route("/health", get(health))
     .route("/favicon.ico", get(favicon))
+    .route("/assets/{*file}", get(static_handler))
     .fallback_service(get(not_found));
 
   let app = NormalizePathLayer::trim_trailing_slash().layer(app);
