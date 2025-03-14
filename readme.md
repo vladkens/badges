@@ -8,7 +8,7 @@
 [<img src="https://badges.ws/badge/Hosted_on_Fly.io-24175B?logo=flydotio" />](https://fly.io)
 [<img src="https://badges.ws/badge/Buy_Me_a_Coffee-ff813f?icon=buymeacoffee" />](https://buymeacoffee.com/vladkens)
 
-Badges.ws is the perfect way to add a touch of elegance to your GitHub repositories, documentation, or any project that needs a badge with personality. Designed to be fast, lightweight, and effortlessly stylish, Badges.ws lets you generate custom SVG badges in seconds.
+Badges.ws is the perfect way to add a touch of elegance to your GitHub repositories, documentation, or any project that needs a badge with personality. Designed to be **fast**, **lightweight**, and **effortlessly stylish**, Badges.ws lets you generate custom SVG badges in seconds.
 
 ## Why Badges.ws?
 
@@ -22,10 +22,11 @@ Badges.ws is the perfect way to add a touch of elegance to your GitHub repositor
 
 ### Package Information
 
-<picture><img src="https://badges.ws/npm/v/react?color=blue&logo=npm" /></picture>
-<picture><img src="https://badges.ws/pypi/v/requests?color=green&logo=pypi" /></picture>
-<picture><img src="https://badges.ws/crates/v/tokio?color=orange&logo=rust" /></picture>
-<picture><img src="https://badges.ws/gem/v/rails?color=red&logo=ruby" /></picture>
+<picture><img src="https://badges.ws/npm/v/react?color=cb3837&logo=npm" /></picture>
+<picture><img src="https://badges.ws/pypi/v/requests?color=3775a9&logo=pypi" /></picture>
+<picture><img src="https://badges.ws/crates/v/tokio?color=f74d02&logo=rust" /></picture>
+<picture><img src="https://badges.ws/gem/v/rails?color=cc342d&logo=rubygems" /></picture>
+<picture><img src="https://badges.ws/packagist/v/laravel/laravel?color=f28d1a&logo=packagist" /></picture>
 
 ### GitHub Insights
 
@@ -75,9 +76,9 @@ docker run -d -p 8080:80 ghcr.io/vladkens/badges:latest
 
 ## Live Integrations
 
-- **Languages & Packages**: JavaScript / TypeScript (NPM), Python (PyPI), Rust (Cargo), Ruby (RubyGems), PHP (Packagist), Dart (Pub), Haskell (Cabal), C# / F# (NuGet), Clojure (Clojars) ⏳, Elixir (Hex) ⏳
-- **Marketplaces**: Homebrew, VSCode Marketplace, Chrome Web Store, Firefox Add-ons, JetBrains Plugins
-- **Services & CI/CD**: GitHub, GitLab ⏳, Docker Hub ⏳
+- **Languages & Packages**: `JS/TS (npm)`, `Python (PyPI)`, `Rust (Cargo)`, `Ruby (Gems)`, `PHP (Packagist)`, `Dart (Pub)`, `Haskell (Cabal)`, `C#/F# (NuGet)`, `Clojure (Clojars)` ⏳, `Elixir (Hex)` ⏳
+- **Marketplaces**: `Homebrew`, `VSCode Marketplace`, `Chrome Web Store`, `Firefox Add-ons`, `JetBrains Plugins`
+- **Services & CI/CD**: `GitHub`, `Docker Hub` ⏳, `GitLab` ⏳
 
 *(⏳ = Coming Soon)*
 
