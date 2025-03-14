@@ -1,6 +1,6 @@
 # badges.ws · Elegant badges for your standout projects 
 
-<img src="assets/logo.svg" align="right" width="128" />
+<picture><img src="assets/logo.svg" align="right" width="128" /></picture>
 
 [<img src="https://badges.ws/badge/status-production-green" />](https://badges.ws)
 [<img src="https://badges.ws/github/license/vladkens/badges" />](https://github.com/vladkens/badges/blob/main/LICENSE)
@@ -22,32 +22,32 @@ Badges.ws is the perfect way to add a touch of elegance to your GitHub repositor
 
 ### Package Information
 
-<img src="https://badges.ws/npm/v/react?color=blue&logo=npm" />
-<img src="https://badges.ws/pypi/v/requests?color=green&logo=pypi" />
-<img src="https://badges.ws/crates/v/tokio?color=orange&logo=rust" />
-<img src="https://badges.ws/gem/v/rails?color=red&logo=ruby" />
+<picture><img src="https://badges.ws/npm/v/react?color=blue&logo=npm" /></picture>
+<picture><img src="https://badges.ws/pypi/v/requests?color=green&logo=pypi" /></picture>
+<picture><img src="https://badges.ws/crates/v/tokio?color=orange&logo=rust" /></picture>
+<picture><img src="https://badges.ws/gem/v/rails?color=red&logo=ruby" /></picture>
 
 ### GitHub Insights
 
-<img src="https://badges.ws/github/stars/facebook/react?color=gold&logo=github" />
-<img src="https://badges.ws/github/release/facebook/react" />
-<img src="https://badges.ws/github/license/facebook/react" />
+<picture><img src="https://badges.ws/github/stars/facebook/react?logo=github" /></picture>
+<picture><img src="https://badges.ws/github/release/facebook/react" /></picture>
+<picture><img src="https://badges.ws/github/license/facebook/react" /></picture>
 
 ### Marketplaces
 
-<img src="https://badges.ws/homebrew/v/node?color=orange&logo=homebrew" />
-<img src="https://badges.ws/vscode/v/ms-python.python?color=blue&logo=vscodium" />
-<img src="https://badges.ws/cws/v/ckkdlimhmcjmikdlpkmbgfkaikojcbjk?logo=googlechrome" />
+<picture><img src="https://badges.ws/homebrew/v/node?color=orange&logo=homebrew" /></picture>
+<picture><img src="https://badges.ws/vscode/v/ms-python.python?color=blue&logo=vscodium" /></picture>
+<picture><img src="https://badges.ws/cws/v/ckkdlimhmcjmikdlpkmbgfkaikojcbjk?logo=googlechrome" /></picture>
 
 ### Social
 
-<img src="https://badges.ws/badge/Gmail-EA4335?logo=gmail" />
-<img src="https://badges.ws/badge/Telegram-26A5E4?logo=telegram" />
-<img src="https://badges.ws/badge/X%2FTwitter-000000?logo=x" />
-<img src="https://badges.ws/badge/Discord-5865F2?logo=discord" />
-<img src="https://badges.ws/badge/Reddit-FF4500?logo=reddit" />
-<img src="https://badges.ws/badge/YouTube-FF0000?logo=youtube" />
-<img src="https://badges.ws/badge/Twitch-9146FF?logo=twitch" />
+<picture><img src="https://badges.ws/badge/Gmail-EA4335?logo=gmail" /></picture>
+<picture><img src="https://badges.ws/badge/Telegram-26A5E4?logo=telegram" /></picture>
+<picture><img src="https://badges.ws/badge/X%2FTwitter-000000?logo=x" /></picture>
+<picture><img src="https://badges.ws/badge/Discord-5865F2?logo=discord" /></picture>
+<picture><img src="https://badges.ws/badge/Reddit-FF4500?logo=reddit" /></picture>
+<picture><img src="https://badges.ws/badge/YouTube-FF0000?logo=youtube" /></picture>
+<picture><img src="https://badges.ws/badge/Twitch-9146FF?logo=twitch" /></picture>
 
 ### More Options
 
@@ -93,6 +93,3 @@ This project was inspired by [Shields.io](https://github.com/badges/shields) and
 
 This project is licensed under the MIT License. See the [LICENSE](/LICENSE) file for details.
 
----
-
-Made with 🍆 by Badges.ws team.
