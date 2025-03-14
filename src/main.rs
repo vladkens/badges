@@ -34,8 +34,9 @@ fn base(title: Option<&str>, node: Markup) -> Markup {
       nav {
         ul {
           li {
-            a href="/" class="contrast no-underline" style="font-size: 2rem; font-weight: 700" {
-              "badges" span class="pico-color-pink-500" { ".ws" } "!"
+            a href="/" class="contrast no-underline" style="font-size: 2rem; font-weight: 700; line-height: 1" {
+              img src="/assets/logo.svg" style="height: 50px; margin-right: 8px; margin-top: -4px" {}
+              span { "badges.ws" }
             }
           }
         }
@@ -43,7 +44,9 @@ fn base(title: Option<&str>, node: Markup) -> Markup {
         ul {
           li {
             a target="_blank" href="https://github.com/vladkens/badges" {
-              img src="https://cdn.simpleicons.org/github/black/white" width="32" height="32" {}
+              button class="outline secondary" {
+                img src="https://cdn.simpleicons.org/github/black/white" width="24" height="24" {}
+              }
             }
           }
         }

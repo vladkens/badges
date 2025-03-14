@@ -1,5 +1,5 @@
 use axum::extract::{Path, Query};
-use cached::proc_macro::once;
+use cached::proc_macro::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -22,8 +22,8 @@ struct Release {
   dlt: u64,
 }
 
-#[once(time = 60, sync_writes = true, result = true)]
-async fn get_data(name: &str) -> Res<Base> {
+#[cached(time = 60, result = true)]
+async fn get_data(name: String) -> Res<Base> {
   let url = format!("https://api.github.com/repos/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -35,8 +35,8 @@ async fn get_data(name: &str) -> Res<Base> {
   Ok(Base { license, stars, forks })
 }
 
-#[once(time = 60, sync_writes = true, result = true)]
-async fn get_release(name: &str) -> Res<Release> {
+#[cached(time = 60, result = true)]
+async fn get_release(name: String) -> Res<Release> {
   let url = format!("https://api.github.com/repos/{name}/releases/latest");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -66,10 +66,10 @@ pub(crate) enum Kind {
 
 pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
   match kind {
-    Kind::Release => Ok(Badge::for_version(&qs, "release", &get_release(&name).await?.version)?),
-    Kind::AssetsDl => Ok(Badge::for_dl(&qs, DlPeriod::Total, get_release(&name).await?.dlt)?),
-    Kind::License => Ok(Badge::for_license(&qs, &get_data(&name).await?.license)?),
-    Kind::Stars => Ok(Badge::for_count(&qs, "stars", get_data(&name).await?.stars)?),
-    Kind::Forks => Ok(Badge::for_count(&qs, "forks", get_data(&name).await?.forks)?),
+    Kind::Release => Ok(Badge::for_version(&qs, "release", &get_release(name).await?.version)?),
+    Kind::AssetsDl => Ok(Badge::for_dl(&qs, DlPeriod::Total, get_release(name).await?.dlt)?),
+    Kind::License => Ok(Badge::for_license(&qs, &get_data(name).await?.license)?),
+    Kind::Stars => Ok(Badge::for_count(&qs, "stars", get_data(name).await?.stars)?),
+    Kind::Forks => Ok(Badge::for_count(&qs, "forks", get_data(name).await?.forks)?),
   }
 }
