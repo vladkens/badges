@@ -6,7 +6,7 @@
 [<img src="https://badges.ws/github/license/vladkens/badges" />](https://github.com/vladkens/badges/blob/main/LICENSE)
 [<img src="https://badges.ws/badge/Build_with_Rust-000000?logo=rust" />](https://www.rust-lang.org)
 [<img src="https://badges.ws/badge/Hosted_on_Fly.io-24175B?logo=flydotio" />](https://fly.io)
-[<img src="https://badges.ws/badge/buy_me_a_coffee-ff813f?icon=buymeacoffee" />](https://buymeacoffee.com/vladkens)
+[<img src="https://badges.ws/badge/Buy_Me_a_Coffee-ff813f?icon=buymeacoffee" />](https://buymeacoffee.com/vladkens)
 
 Badges.ws is the perfect way to add a touch of elegance to your GitHub repositories, documentation, or any project that needs a badge with personality. Designed to be fast, lightweight, and effortlessly stylish, Badges.ws lets you generate custom SVG badges in seconds.
 
@@ -51,7 +51,7 @@ Badges.ws is the perfect way to add a touch of elegance to your GitHub repositor
 
 ### More Options
 
-Visit [badges.ws](https://badges.ws) to explore more available options!
+Visit [badges.ws](https://badges.ws) to explore more options!
 
 ## Get Started in 10 Seconds
 
@@ -61,7 +61,7 @@ Creating your custom badge is as easy as plugging values into a URL:
 https://badges.ws/badge/{label}-{message}-{color}
 ```
 
-Replace `{label}`, `{message}`, and `{color}` with your desired text and color code, and your badge is ready to shine! Embed then in you `readme.md`:
+Replace `{label}`, `{message}`, and `{color}` with your desired text and color code, and your badge is ready to shine! Embed then in your `readme.md`:
 
 ```sh
 [<img src="https://badges.ws/badge/Version-1.0.0-red" />](https://your-project.link)
@@ -83,7 +83,7 @@ docker run -d -p 8080:80 ghcr.io/vladkens/badges:latest
 
 ## Contribute
 
-**Missing an integration?** Request it or contribute — let’s build the ultimate badge toolkit together!
+**Missing an integration?** Request or contribute — let’s build the ultimate badge toolkit together!
 
 ## Credits & Inspiration
 
@@ -92,4 +92,3 @@ This project was inspired by [Shields.io](https://github.com/badges/shields) and
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](/LICENSE) file for details.
-
