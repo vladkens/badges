@@ -34,11 +34,11 @@ pub async fn handler2(Path(config): Path<String>, Query(qs): Query<Dict>) -> Bad
   // println!(">> {:?} {:?} {:?}", label, value, color);
 
   let mut badge = Badge::from_qs(&qs)?;
-  badge.label = if label.is_empty() { badge.label } else { Some(label.to_string()) };
-  badge.value = value.to_string();
-  badge.value_color = match badge.value_color {
+  badge.llabel = if label.is_empty() { badge.llabel } else { Some(label.to_string()) };
+  badge.rlabel = value.to_string();
+  badge.rcolor = match badge.rcolor {
     Color::DefaultValue => color,
-    _ => badge.value_color,
+    _ => badge.rcolor,
   };
 
   Ok(badge)
@@ -53,11 +53,11 @@ pub async fn handler3(
   let color = qs.get("color").map_or(color, |x| Color::from_str(x).unwrap_or_default());
 
   let mut badge = Badge::from_qs(&qs)?;
-  badge.label = Some(label.to_string());
-  badge.value = value.to_string();
-  badge.value_color = match badge.value_color {
+  badge.llabel = Some(label.to_string());
+  badge.rlabel = value.to_string();
+  badge.rcolor = match badge.rcolor {
     Color::DefaultValue => color,
-    _ => badge.value_color,
+    _ => badge.rcolor,
   };
 
   Ok(badge)
