@@ -1,19 +1,21 @@
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
+use cached::proc_macro::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, Color, DlPeriod, utils::to_ver_label};
 use crate::server::{BadgeRep, Dict, Res};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct PyPiData {
   version: String,
   license: String,
   pythons: Vec<String>,
 }
 
-async fn get_data(name: &str) -> Res<PyPiData> {
+#[cached(time = 60, result = true)]
+async fn get_data(name: String) -> Res<PyPiData> {
   let url = format!("https://pypi.org/pypi/{name}/json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -32,7 +34,8 @@ async fn get_data(name: &str) -> Res<PyPiData> {
   Ok(PyPiData { version, license, pythons })
 }
 
-async fn get_dl_granular(name: &str) -> Res<(u64, u64)> {
+#[cached(time = 60, result = true)]
+async fn get_dl_granular(name: String) -> Res<(u64, u64)> {
   // doc: https://pypistats.org/api/
   let url = format!("https://pypistats.org/api/packages/{}/recent", name);
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -43,7 +46,8 @@ async fn get_dl_granular(name: &str) -> Res<(u64, u64)> {
   Ok((dlw, dlm))
 }
 
-async fn get_dl_total(name: &str) -> Res<u64> {
+#[cached(time = 60, result = true)]
+async fn get_dl_total(name: String) -> Res<u64> {
   let url = format!("https://pypistats.org/api/packages/{}/overall?mirrors=true", name);
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -72,14 +76,14 @@ pub(crate) enum Kind {
 
 pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
   match kind {
-    Kind::Version => Ok(Badge::for_version(&qs, "pypi", &get_data(&name).await?.version)?),
-    Kind::License => Ok(Badge::for_license(&qs, &get_data(&name).await?.license)?),
-    Kind::Weekly => Ok(Badge::for_dl(&qs, DlPeriod::Weekly, get_dl_granular(&name).await?.0)?),
-    Kind::Monthly => Ok(Badge::for_dl(&qs, DlPeriod::Monthly, get_dl_granular(&name).await?.1)?),
-    Kind::Total => Ok(Badge::for_dl(&qs, DlPeriod::Total, get_dl_total(&name).await?)?),
+    Kind::Version => Ok(Badge::for_version(&qs, "pypi", &get_data(name).await?.version)?),
+    Kind::License => Ok(Badge::for_license(&qs, &get_data(name).await?.license)?),
+    Kind::Weekly => Ok(Badge::for_dl(&qs, DlPeriod::Weekly, get_dl_granular(name).await?.0)?),
+    Kind::Monthly => Ok(Badge::for_dl(&qs, DlPeriod::Monthly, get_dl_granular(name).await?.1)?),
+    Kind::Total => Ok(Badge::for_dl(&qs, DlPeriod::Total, get_dl_total(name).await?)?),
 
     Kind::Python => {
-      let rs = get_data(&name).await?;
+      let rs = get_data(name).await?;
       Ok(Badge::new("python", &to_ver_label(rs.pythons), Color::Blue))
     }
   }

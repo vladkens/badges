@@ -1,4 +1,5 @@
 use axum::extract::{Path, Query};
+use cached::proc_macro::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -8,14 +9,15 @@ use crate::{
   server::BadgeRep,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Data {
   version: String,
   license: String,
   dlw: u64, // weekly downloads
 }
 
-async fn get_data(name: &str) -> Res<Data> {
+#[cached(time = 60, result = true)]
+async fn get_data(name: String) -> Res<Data> {
   let url = format!("https://addons.mozilla.org/api/v4/addons/addon/{name}/");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -40,7 +42,7 @@ pub(crate) enum Kind {
 }
 
 pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
-  let rs = get_data(&name).await?;
+  let rs = get_data(name).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "mozilla add-on", &rs.version)?),
     Kind::License => Ok(Badge::for_license(&qs, &rs.license)?),

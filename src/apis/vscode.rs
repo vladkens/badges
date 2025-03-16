@@ -1,4 +1,5 @@
 use axum::extract::{Path, Query};
+use cached::proc_macro::cached;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -6,14 +7,15 @@ use super::get_client;
 use crate::badgelib::{Badge, Color, utils::millify};
 use crate::server::{BadgeRep, Dict, Res};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Data {
   version: String,
   installs: u64,
   downloads: u64,
 }
 
-async fn get_data(name: &str) -> Res<Data> {
+#[cached(time = 60, result = true)]
+async fn get_data(name: String) -> Res<Data> {
   let url = "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery";
   let dat = json!({
     "filters": [{ "criteria": [{ "filterType": 7, "value": name }] }],
@@ -50,7 +52,7 @@ pub(crate) enum Kind {
 }
 
 pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
-  let rs = get_data(&name).await?;
+  let rs = get_data(name).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "vscode", &rs.version)?),
     Kind::Installs => Ok(Badge::new("installs", &millify(rs.installs), Color::Green)),

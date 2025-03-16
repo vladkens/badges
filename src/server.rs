@@ -47,6 +47,8 @@ impl<E: Into<anyhow::Error>> From<E> for BadgeError {
 
 impl IntoResponse for BadgeError {
   fn into_response(self) -> Response {
+    tracing::error!("error: {:?}", self.0);
+
     let e = self.0;
     if e.downcast_ref::<reqwest::Error>().is_some() {
       let e = e.downcast_ref::<reqwest::Error>().unwrap();

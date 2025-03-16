@@ -1,11 +1,12 @@
 use axum::extract::{Path, Query};
+use cached::proc_macro::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, Color, utils::render_stars};
 use crate::server::{BadgeRep, Dict, Res};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Data {
   version: String,
   users: String,
@@ -13,10 +14,12 @@ struct Data {
   score_count: u64,
 }
 
-async fn get_data(name: &str) -> Res<Data> {
+#[cached(time = 60, result = true)]
+async fn get_data(name: String) -> Res<Data> {
   // https://github.com/simov/chrome-webstore/blob/master/client.js
   let url = "https://chrome.google.com/webstore/ajax/detail";
-  let req = get_client().post(url).query(&[("id", name), ("hl", "en"), ("pv", "20210820")]);
+  let opt = &[("id", name.as_str()), ("hl", "en"), ("pv", "20210820")];
+  let req = get_client().post(url).query(opt);
   let req = req.body("").header("accept", "*/*").header("content-length", "0").build()?;
   let rep = get_client().execute(req).await?.error_for_status()?;
 
@@ -46,7 +49,7 @@ pub(crate) enum Kind {
 }
 
 pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
-  let rs = get_data(&name).await?;
+  let rs = get_data(name).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "chrome web store", &rs.version)?),
     Kind::Users => Ok(Badge::new("users", &rs.users, Color::DefaultValue)),

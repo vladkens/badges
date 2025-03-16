@@ -1,23 +1,25 @@
 use axum::extract::{Path, Query};
+use cached::proc_macro::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, DlPeriod};
 use crate::server::{BadgeRep, Dict, Res};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Data {
   version: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Score {
   dlm: u64,
   likes: u64,
   license: String,
 }
 
-async fn get_data(name: &str) -> Res<Data> {
+#[cached(time = 60, result = true)]
+async fn get_data(name: String) -> Res<Data> {
   let url = format!("https://pub.dev/api/packages/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -27,7 +29,8 @@ async fn get_data(name: &str) -> Res<Data> {
   Ok(Data { version })
 }
 
-async fn get_score(name: &str) -> Res<Score> {
+#[cached(time = 60, result = true)]
+async fn get_score(name: String) -> Res<Score> {
   let url = format!("https://pub.dev/api/packages/{name}/score");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -65,9 +68,9 @@ pub(crate) enum Kind {
 
 pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
   match kind {
-    Kind::Version => Ok(Badge::for_version(&qs, "pub", &get_data(&name).await?.version)?),
-    Kind::License => Ok(Badge::for_license(&qs, &get_score(&name).await?.license)?),
-    Kind::Weekly => Ok(Badge::for_dl(&qs, DlPeriod::Weekly, get_score(&name).await?.dlm / 4)?),
-    Kind::Monthly => Ok(Badge::for_dl(&qs, DlPeriod::Monthly, get_score(&name).await?.dlm)?),
+    Kind::Version => Ok(Badge::for_version(&qs, "pub", &get_data(name).await?.version)?),
+    Kind::License => Ok(Badge::for_license(&qs, &get_score(name).await?.license)?),
+    Kind::Weekly => Ok(Badge::for_dl(&qs, DlPeriod::Weekly, get_score(name).await?.dlm / 4)?),
+    Kind::Monthly => Ok(Badge::for_dl(&qs, DlPeriod::Monthly, get_score(name).await?.dlm)?),
   }
 }

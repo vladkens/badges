@@ -1,18 +1,20 @@
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
+use cached::proc_macro::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, DlPeriod};
 use crate::server::{BadgeRep, Dict, Res};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct NpmData {
   version: String,
   license: String,
 }
 
-async fn get_data(name: &str) -> Res<NpmData> {
+#[cached(time = 60, result = true)]
+async fn get_data(name: String) -> Res<NpmData> {
   let url = format!("https://unpkg.com/{name}@latest/package.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -22,7 +24,8 @@ async fn get_data(name: &str) -> Res<NpmData> {
   Ok(NpmData { version, license })
 }
 
-async fn get_downloads(name: &str, kind: &Kind) -> Res<u64> {
+#[cached(time = 60, result = true)]
+async fn get_downloads(name: String, kind: Kind) -> Res<u64> {
   let url = "https://api.npmjs.org/downloads";
   let url = match kind {
     Kind::Weekly => format!("{url}/range/last-week/{name}"),
@@ -40,7 +43,9 @@ async fn get_downloads(name: &str, kind: &Kind) -> Res<u64> {
   Ok(dls)
 }
 
-#[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display)]
+#[derive(
+  Debug, Deserialize, Serialize, strum::EnumIter, strum::Display, Hash, Clone, PartialEq, Eq,
+)]
 pub(crate) enum Kind {
   #[serde(rename = "v", alias = "version")]
   Version,
@@ -59,10 +64,10 @@ pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<
   let name = if name.contains("/") && !name.starts_with('@') { format!("@{}", name) } else { name };
 
   match kind {
-    Kind::Version => Ok(Badge::for_version(&qs, "npm", &get_data(&name).await?.version)?),
-    Kind::License => Ok(Badge::for_license(&qs, &get_data(&name).await?.license)?),
-    Kind::Weekly => Ok(Badge::for_dl(&qs, DlPeriod::Weekly, get_downloads(&name, &kind).await?)?),
-    Kind::Monthly => Ok(Badge::for_dl(&qs, DlPeriod::Monthly, get_downloads(&name, &kind).await?)?),
-    Kind::Total => Ok(Badge::for_dl(&qs, DlPeriod::Total, get_downloads(&name, &kind).await?)?),
+    Kind::Version => Ok(Badge::for_version(&qs, "npm", &get_data(name).await?.version)?),
+    Kind::License => Ok(Badge::for_license(&qs, &get_data(name).await?.license)?),
+    Kind::Weekly => Ok(Badge::for_dl(&qs, DlPeriod::Weekly, get_downloads(name, kind).await?)?),
+    Kind::Monthly => Ok(Badge::for_dl(&qs, DlPeriod::Monthly, get_downloads(name, kind).await?)?),
+    Kind::Total => Ok(Badge::for_dl(&qs, DlPeriod::Total, get_downloads(name, kind).await?)?),
   }
 }

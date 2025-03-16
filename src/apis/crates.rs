@@ -1,11 +1,12 @@
 use axum::extract::{Path, Query};
+use cached::proc_macro::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, Color, DlPeriod};
 use crate::server::{BadgeRep, Dict, Res};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct CrateData {
   version: String,
   license: String,
@@ -14,7 +15,8 @@ struct CrateData {
   msrv: String, // minimum supported rust version
 }
 
-async fn get_data(name: &str) -> Res<CrateData> {
+#[cached(time = 60, result = true)]
+async fn get_data(name: String) -> Res<CrateData> {
   let url = format!("https://crates.io/api/v1/crates/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -38,7 +40,8 @@ async fn get_data(name: &str) -> Res<CrateData> {
   Ok(CrateData { version, license, dlt, dlq, msrv })
 }
 
-async fn get_docs(name: &str) -> Res<bool> {
+#[cached(time = 60, result = true)]
+async fn get_docs(name: String) -> Res<bool> {
   let url = format!("https://docs.rs/crate/{name}/latest/status.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -65,13 +68,13 @@ pub(crate) enum Kind {
 
 pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
   if kind == Kind::Docs {
-    let status = get_docs(&name).await?;
+    let status = get_docs(name).await?;
     let value = if status { "passing" } else { "failing" };
     let color = if status { Color::Green } else { Color::Red };
     return Ok(Badge::from_qs_with(&qs, "docs", value, color)?);
   }
 
-  let rs = get_data(&name).await?;
+  let rs = get_data(name).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "crates.io", &rs.version)?),
     Kind::License => Ok(Badge::for_license(&qs, &rs.license)?),

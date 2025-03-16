@@ -1,5 +1,6 @@
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
+use cached::proc_macro::cached;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 
@@ -7,7 +8,7 @@ use super::get_client;
 use crate::badgelib::{Badge, DlPeriod};
 use crate::server::{BadgeRep, Dict, Res};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct PackageData {
   version: String,
   license: String,
@@ -28,7 +29,8 @@ fn parse_versions(
   obj.collect::<Vec<_>>()
 }
 
-async fn get_data(name: &str) -> Res<PackageData> {
+#[cached(time = 60, result = true)]
+async fn get_data(name: String) -> Res<PackageData> {
   let url = format!("https://packagist.org/packages/{name}.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -68,11 +70,8 @@ pub(crate) enum Kind {
   PHP,
 }
 
-pub async fn handler(
-  Path((kind, project)): Path<(Kind, String)>,
-  Query(qs): Query<Dict>,
-) -> BadgeRep {
-  let rs = get_data(&project).await?;
+pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
+  let rs = get_data(name).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "packagist", &rs.version)?),
     Kind::License => Ok(Badge::for_license(&qs, &rs.license)?),

@@ -1,12 +1,13 @@
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
+use cached::proc_macro::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::badgelib::{Badge, DlPeriod};
 use crate::server::{BadgeRep, Dict, Res};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct GemData {
   version: String,
   license: String,
@@ -14,7 +15,8 @@ struct GemData {
   ruby_ver: String,
 }
 
-async fn get_data(name: &str) -> Res<GemData> {
+#[cached(time = 60, result = true)]
+async fn get_data(name: String) -> Res<GemData> {
   // let url = format!("https://rubygems.org/api/v1/gems/{name}.json");
   let url = format!("https://rubygems.org/api/v1/versions/{name}.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -46,7 +48,7 @@ pub(crate) enum Kind {
 }
 
 pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
-  let rs = get_data(&name).await?;
+  let rs = get_data(name).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "gem", &rs.version)?),
     Kind::License => Ok(Badge::for_license(&qs, &rs.license)?),
