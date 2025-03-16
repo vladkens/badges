@@ -14,6 +14,7 @@ pub(crate) mod nuget;
 pub(crate) mod packagephobia;
 pub(crate) mod packagist;
 pub(crate) mod pypi;
+pub(crate) mod readthedocs;
 pub(crate) mod vscode;
 
 pub(crate) fn get_client() -> reqwest::Client {

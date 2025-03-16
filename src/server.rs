@@ -137,7 +137,8 @@ fn rewrite_request_uri<B>(mut req: Request<B>) -> Request<B> {
 
     *req.uri_mut() = format!("{}{}", path, qs).parse().unwrap();
   } else {
-    *req.uri_mut() = clean_path.parse().unwrap();
+    let qs = uri.query().map(|q| format!("?{}", q)).unwrap_or_default();
+    *req.uri_mut() = format!("{}{}", clean_path, qs).parse().unwrap();
   }
 
   req

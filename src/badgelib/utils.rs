@@ -1,4 +1,6 @@
-use super::_width::WIDTHS;
+use chrono::{DateTime, Utc};
+
+use super::{_width::WIDTHS, Color};
 
 pub fn cacl_width(text: &str) -> f32 {
   let fallback_width = WIDTHS[64]; // Width as "@" for overflows
@@ -58,4 +60,20 @@ pub fn millify(n: u64) -> String {
   let label = label.strip_suffix(".0").unwrap_or(&label);
   let label = format!("{label}{}", units[i]);
   label
+}
+
+pub fn for_date(date: DateTime<Utc>) -> (String, Color) {
+  let now = Utc::now();
+  let duration = now.signed_duration_since(date);
+
+  let (label, color) = match duration.num_days() {
+    0 => ("today", Color::Green),
+    1 => ("yesterday", Color::Green),
+    2..=6 => ("this week", Color::Yellow),
+    7..=29 => ("this month", Color::Yellow),
+    30..=365 => ("this year", Color::Orange),
+    _ => ("long ago", Color::Grey),
+  };
+
+  (label.into(), color)
 }

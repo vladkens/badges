@@ -1,10 +1,21 @@
-use axum::routing::get;
+use axum::{Router, routing::get};
 use tracing_subscriber::layer::SubscriberExt;
 
 mod apis;
 mod badgelib;
 mod pages;
 mod server;
+
+#[macro_export]
+macro_rules! redirect {
+  ($to:expr) => {{
+    let to = $to.to_string();
+    axum::routing::get(move |axum::extract::Path(rest): axum::extract::Path<String>| async move {
+      let url = to.replace("{*rest}", &rest);
+      axum::response::Redirect::permanent(&url)
+    })
+  }};
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -25,11 +36,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   let brand = format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
   tracing::info!("{}", brand);
 
-  let app = axum::Router::new()
+  let badges = Router::new()
     .route("/pypi/{kind}/{name}", get(apis::pypi::handler))
     .route("/npm/{kind}/{*name}", get(apis::npm::handler)) // name can be scoped
     .route("/packagephobia/{kind}/{*name}", get(apis::packagephobia::handler)) // name can be scoped
     .route("/crates/{kind}/{name}", get(apis::crates::handler))
+    .route("/docsrs/{*rest}", redirect!("/crates/docs/{*rest}"))
     .route("/packagist/{kind}/{*name}", get(apis::packagist::handler))
     .route("/gem/{kind}/{*name}", get(apis::gems::handler))
     .route("/pub/{kind}/{*name}", get(apis::dart_pub::handler))
@@ -40,11 +52,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .route("/vscode/{kind}/{name}", get(apis::vscode::handler))
     .route("/amo/{kind}/{name}", get(apis::amo::handler))
     .route("/cws/{kind}/{name}", get(apis::cws::handler))
+    .route("/chrome-web-store/{*rest}", redirect!("/cws/{*rest}"))
     .route("/jetbrains/{kind}/{name}", get(apis::jetbrains::handler))
     .route("/github/{kind}/{*name}", get(apis::github::handler))
+    .route("/readthedocs/{name}", get(apis::readthedocs::handler))
     .route("/badge", get(apis::fixed::handler1))
     .route("/badge/{config}", get(apis::fixed::handler2))
-    .route("/badge/{label}/{value}/{color}", get(apis::fixed::handler3))
+    .route("/badge/{label}/{value}/{color}", get(apis::fixed::handler3));
+
+  let app = axum::Router::new()
+    .merge(badges)
     .route("/", get(pages::index))
     .route("/debug", get(pages::debug));
 

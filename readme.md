@@ -2,7 +2,8 @@
 
 <picture><img src="assets/logo.svg" align="right" width="128" /></picture>
 
-[<img src="https://badges.ws/badge/status-production-green" />](https://badges.ws)
+<!-- [<img src="https://badges.ws/badge/status-production-green" />](https://badges.ws) -->
+[<img src="https://badges.ws/badge/status-beta-yellow" />](https://badges.ws)
 [<img src="https://badges.ws/github/license/vladkens/badges" />](https://github.com/vladkens/badges/blob/main/LICENSE)
 [<img src="https://badges.ws/badge/Build_with_Rust-000000?logo=rust" />](https://www.rust-lang.org)
 [<img src="https://badges.ws/badge/Hosted_on_Fly.io-24175B?logo=flydotio" />](https://fly.io)

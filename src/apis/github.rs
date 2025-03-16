@@ -1,8 +1,11 @@
+use anyhow::anyhow;
 use axum::extract::{Path, Query};
 use cached::proc_macro::cached;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
+use crate::badgelib::utils::for_date;
 use crate::server::{Dict, Res};
 use crate::{
   badgelib::{Badge, DlPeriod},
@@ -50,6 +53,19 @@ async fn get_release(name: String) -> Res<Release> {
   Ok(Release { version, dlt })
 }
 
+#[cached(time = 60, result = true)]
+async fn last_commit(name: String) -> Res<DateTime<Utc>> {
+  let url = format!("https://api.github.com/repos/{name}/commits");
+  let rep = get_client().get(&url).query(&[("per_page", "1")]);
+  let rep = rep.send().await?.error_for_status()?;
+  let dat = rep.json::<serde_json::Value>().await?;
+
+  dat[0]["commit"]["author"]["date"]
+    .as_str()
+    .and_then(|x| x.parse::<DateTime<Utc>>().ok())
+    .ok_or_else(|| anyhow!("no date"))
+}
+
 #[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display)]
 pub(crate) enum Kind {
   #[serde(rename = "release")]
@@ -62,6 +78,8 @@ pub(crate) enum Kind {
   Stars,
   #[serde(rename = "forks")]
   Forks,
+  #[serde(rename = "last-commit")]
+  LastCommit,
 }
 
 pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
@@ -71,5 +89,9 @@ pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<
     Kind::License => Ok(Badge::for_license(&qs, &get_data(name).await?.license)?),
     Kind::Stars => Ok(Badge::for_count(&qs, "stars", get_data(name).await?.stars)?),
     Kind::Forks => Ok(Badge::for_count(&qs, "forks", get_data(name).await?.forks)?),
+    Kind::LastCommit => {
+      let (value, color) = for_date(last_commit(name).await?);
+      Ok(Badge::from_qs_with(&qs, "last commit", &value, color)?)
+    }
   }
 }

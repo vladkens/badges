@@ -2,15 +2,16 @@ use axum::extract::{Path, Query};
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::badgelib::{Badge, DlPeriod};
+use crate::badgelib::{Badge, Color, DlPeriod};
 use crate::server::{BadgeRep, Dict, Res};
 
 #[derive(Debug)]
 struct CrateData {
   version: String,
   license: String,
-  dlt: u64, // total downloads
-  dlq: u64, // quarterly downloads
+  dlt: u64,     // total downloads
+  dlq: u64,     // quarterly downloads
+  msrv: String, // minimum supported rust version
 }
 
 async fn get_data(name: &str) -> Res<CrateData> {
@@ -32,11 +33,19 @@ async fn get_data(name: &str) -> Res<CrateData> {
     .find(|x| x["num"].as_str() == Some(&version))
     .ok_or(anyhow::anyhow!("version not found"))?;
   let license = ver_data["license"].as_str().unwrap_or("unknown").to_string();
+  let msrv = ver_data["rust_version"].as_str().unwrap_or("unknown").to_string();
 
-  Ok(CrateData { version, license, dlt, dlq })
+  Ok(CrateData { version, license, dlt, dlq, msrv })
 }
 
-#[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display)]
+async fn get_docs(name: &str) -> Res<bool> {
+  let url = format!("https://docs.rs/crate/{name}/latest/status.json");
+  let rep = get_client().get(&url).send().await?.error_for_status()?;
+  let dat = rep.json::<serde_json::Value>().await?;
+  Ok(dat["doc_status"].as_bool().unwrap_or(false))
+}
+
+#[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display, PartialEq)]
 pub(crate) enum Kind {
   #[serde(rename = "v", alias = "version")]
   Version,
@@ -48,9 +57,20 @@ pub(crate) enum Kind {
   Monthly,
   #[serde(rename = "dt")]
   Total,
+  #[serde(rename = "msrv")]
+  Msrv,
+  #[serde(rename = "docs")]
+  Docs,
 }
 
 pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
+  if kind == Kind::Docs {
+    let status = get_docs(&name).await?;
+    let value = if status { "passing" } else { "failing" };
+    let color = if status { Color::Green } else { Color::Red };
+    return Ok(Badge::from_qs_with(&qs, "docs", value, color)?);
+  }
+
   let rs = get_data(&name).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "crates.io", &rs.version)?),
@@ -58,5 +78,7 @@ pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<
     Kind::Total => Ok(Badge::for_dl(&qs, DlPeriod::Total, rs.dlt)?), // 12 weeks in 90 days
     Kind::Weekly => Ok(Badge::for_dl(&qs, DlPeriod::Weekly, rs.dlq / 12)?), // 12 weeks in 90 days
     Kind::Monthly => Ok(Badge::for_dl(&qs, DlPeriod::Monthly, rs.dlq / 3)?), // 3 months in 90 days
+    Kind::Msrv => Ok(Badge::for_version(&qs, "msrv", &rs.msrv)?),
+    Kind::Docs => unreachable!(),
   }
 }
