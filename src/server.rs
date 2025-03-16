@@ -9,7 +9,6 @@ use axum::{
 };
 use rust_embed::Embed;
 use tokio::net::TcpListener;
-use tower_http::normalize_path::NormalizePathLayer;
 use tower_layer::Layer;
 use tracing::Level;
 
@@ -116,6 +115,34 @@ async fn static_handler(uri: Uri) -> impl IntoResponse {
   }
 }
 
+fn rewrite_request_uri<B>(mut req: Request<B>) -> Request<B> {
+  let uri = req.uri().clone();
+  let path = uri.path();
+
+  // Remove trailing slash (except for root "/")
+  let clean_path = if path == "/" { path } else { path.trim_end_matches('/') };
+
+  let re = regex::Regex::new(r"^([^?]+?)(?:\.(svg|json))(\?.*)?$").unwrap();
+  let caps = re.captures(clean_path);
+
+  if !clean_path.starts_with("/assets/") && caps.is_some() {
+    let caps = caps.unwrap();
+    let path = caps.get(1).unwrap().as_str().to_string();
+    let ext = caps.get(2).unwrap().as_str();
+    let qs = caps.get(3).map(|q| q.as_str()).unwrap_or("");
+    let qs = match qs.is_empty() {
+      true => format!("?format={}", ext),
+      false => format!("{}&format={}", qs, ext),
+    };
+
+    *req.uri_mut() = format!("{}{}", path, qs).parse().unwrap();
+  } else {
+    *req.uri_mut() = clean_path.parse().unwrap();
+  }
+
+  req
+}
+
 pub async fn run_server(app: axum::Router) -> Result<(), Box<dyn std::error::Error>> {
   let app = app
     .layer(
@@ -128,8 +155,12 @@ pub async fn run_server(app: axum::Router) -> Result<(), Box<dyn std::error::Err
     .route("/assets/{*file}", get(static_handler))
     .fallback_service(get(not_found));
 
-  let app = NormalizePathLayer::trim_trailing_slash().layer(app);
-  let app = ServiceExt::<Request>::into_make_service(app);
+  // https://docs.rs/axum/latest/axum/middleware/index.html#rewriting-request-uri-in-middleware
+  // waiting for answer: https://github.com/tokio-rs/axum/discussions/3270
+  let app = tower::util::MapRequestLayer::new(rewrite_request_uri).layer(app).into_make_service();
+
+  // let app = NormalizePathLayer::trim_trailing_slash().layer(app);
+  // let app = ServiceExt::<Request>::into_make_service(app);
 
   let host = std::env::var("HOST").unwrap_or("127.0.0.1".to_string());
   let port = std::env::var("PORT").unwrap_or("8080".to_string());

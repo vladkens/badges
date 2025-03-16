@@ -1,7 +1,7 @@
 tag=badges
 
 dev:
-	watchexec -r -- cargo run
+	watchexec -rc -e rs -- cargo run
 
 lint:
 	cargo fmt --check

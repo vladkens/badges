@@ -10,6 +10,7 @@
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 99
   },  
+  "rust-analyzer.cargo.targetDir": true,
   "editor.formatOnSave": true,
   "files.exclude": { "Cargo.lock": true, "target": true },
   "evenBetterToml.formatter.columnWidth": 100,

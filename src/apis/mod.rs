@@ -1,6 +1,4 @@
-#![deny(unused_imports)]
 #![forbid(absolute_paths_not_starting_with_crate)]
-
 pub(crate) mod amo;
 pub(crate) mod crates;
 pub(crate) mod cws;

@@ -42,7 +42,7 @@ pub enum DlPeriod {
   Total,
 }
 
-#[derive(Debug, Default, PartialEq, Clone)]
+#[derive(Debug, Default, PartialEq, Clone, serde::Serialize)]
 pub enum BadgeStyle {
   #[default]
   Flat,
@@ -63,7 +63,22 @@ impl BadgeStyle {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone, serde::Serialize)]
+pub enum BadgeFormat {
+  Svg,
+  Json,
+}
+
+impl BadgeFormat {
+  pub fn parse(s: &str) -> Self {
+    match s.to_lowercase().as_str() {
+      "json" => BadgeFormat::Json,
+      _ => BadgeFormat::Svg,
+    }
+  }
+}
+
+#[derive(Debug, serde::Serialize)]
 pub struct Badge {
   pub llabel: Option<String>,
   pub lcolor: Color,
@@ -75,6 +90,7 @@ pub struct Badge {
   pub radius: u8,
   pub scale: f32,
   pub cache: u32,
+  pub format: BadgeFormat,
 }
 
 impl Badge {
@@ -90,6 +106,7 @@ impl Badge {
       radius: 3,
       scale: 1.0,
       cache: DEFAULT_CACHE,
+      format: BadgeFormat::Svg,
     }
   }
 
@@ -122,7 +139,21 @@ impl Badge {
       .unwrap_or(DEFAULT_CACHE)
       .clamp(300, DEFAULT_CACHE * 7);
 
-    Ok(Badge { llabel, lcolor, rlabel, rcolor, icon, icon_color, style, radius, scale, cache })
+    let format = qs.get("format").map(|x| BadgeFormat::parse(x)).unwrap_or(BadgeFormat::Svg);
+
+    Ok(Badge {
+      llabel,
+      lcolor,
+      rlabel,
+      rcolor,
+      icon,
+      icon_color,
+      style,
+      radius,
+      scale,
+      cache,
+      format,
+    })
   }
 
   pub fn from_qs_with(qs: &Dict, label: &str, value: &str, value_color: Color) -> Res<Badge> {
@@ -275,8 +306,8 @@ impl Badge {
       mask id="r" { rect width=(w) height=(h) rx=(radius) fill="#fff" {} }
 
       g mask="url(#r)" {
-        @if has_text || has_icon { rect x="0" y="0" width=(lw) height=(h) fill=(self.lcolor.to_css()) {} }
-        rect x=(w-rw) y="0" width=(rw) height=(h) fill=(self.rcolor.to_css()) {}
+        @if has_text || has_icon { rect x="0" y="0" width=(w) height=(h) fill=(self.lcolor.to_css()) {} }
+        rect x=(w-rw) y="0" width=(rw) height=(h) fill=(self.rcolor.to_css()) rx=(0) {}
         rect x="0" y="0" width=(w) height=(h) fill="url(#s)" {}
       }
 
@@ -303,7 +334,16 @@ impl Badge {
 impl IntoResponse for Badge {
   fn into_response(self) -> Response {
     let cc = format!("public,max-age={0},s-maxage=300,stale-while-revalidate={0}", self.cache);
-    let headers = [(header::CONTENT_TYPE, "image/svg+xml"), (header::CACHE_CONTROL, &cc)];
-    (StatusCode::OK, headers, self.to_str()).into_response()
+    match self.format {
+      BadgeFormat::Json => {
+        let headers = [(header::CONTENT_TYPE, "application/json"), (header::CACHE_CONTROL, &cc)];
+        let content = serde_json::to_string(&self).unwrap();
+        (StatusCode::OK, headers, content).into_response()
+      }
+      _ => {
+        let headers = [(header::CONTENT_TYPE, "image/svg+xml"), (header::CACHE_CONTROL, &cc)];
+        (StatusCode::OK, headers, self.to_str()).into_response()
+      }
+    }
   }
 }

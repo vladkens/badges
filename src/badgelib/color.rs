@@ -1,7 +1,7 @@
 use serde::{Deserialize, Deserializer};
 
 // From: https://github.com/badgen/badgen/blob/master/src/color-presets.ts
-#[derive(Debug, PartialEq, Clone, Default, strum::EnumIter)]
+#[derive(Debug, PartialEq, Clone, Default, strum::EnumIter, serde::Serialize)]
 pub enum Color {
   DefaultLabel,
   #[default]
