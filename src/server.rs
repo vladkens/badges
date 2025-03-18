@@ -121,28 +121,18 @@ fn rewrite_request_uri<B>(mut req: Request<B>) -> Request<B> {
   let uri = req.uri().clone();
   let path = uri.path();
 
-  // Remove trailing slash (except for root "/")
-  let clean_path = if path == "/" { path } else { path.trim_end_matches('/') };
+  let mut path = if path == "/" { path } else { path.trim_end_matches('/') };
+  let mut qs = req.uri().query().unwrap_or_default().to_string();
 
-  let re = regex::Regex::new(r"^([^?]+?)(?:\.(svg|json))(\?.*)?$").unwrap();
-  let caps = re.captures(clean_path);
-
-  if !clean_path.starts_with("/assets/") && caps.is_some() {
-    let caps = caps.unwrap();
-    let path = caps.get(1).unwrap().as_str().to_string();
-    let ext = caps.get(2).unwrap().as_str();
-    let qs = caps.get(3).map(|q| q.as_str()).unwrap_or("");
-    let qs = match qs.is_empty() {
-      true => format!("?format={}", ext),
-      false => format!("{}&format={}", qs, ext),
-    };
-
-    *req.uri_mut() = format!("{}{}", path, qs).parse().unwrap();
-  } else {
-    let qs = uri.query().map(|q| format!("?{}", q)).unwrap_or_default();
-    *req.uri_mut() = format!("{}{}", clean_path, qs).parse().unwrap();
+  let has_ext = path.ends_with(".svg") || path.ends_with(".json");
+  if !path.starts_with("/assets/") && has_ext {
+    let ext = path.split('.').last().unwrap();
+    path = path.trim_end_matches(&format!(".{}", ext));
+    qs = if qs.is_empty() { format!("format={}", ext) } else { format!("{}&format={}", qs, ext) };
   }
 
+  qs = if qs.is_empty() { qs } else { format!("?{}", qs) };
+  *req.uri_mut() = format!("{}{}", path, qs).parse().unwrap();
   req
 }
 

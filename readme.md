@@ -53,7 +53,7 @@ Badges.ws is the perfect way to add a touch of elegance to your GitHub repositor
 
 ### More Options
 
-Visit [badges.ws](https://badges.ws) to explore more options!
+Visit [badges.ws](https://badges.ws) to explore!
 
 ## Get Started in 10 Seconds
 
@@ -77,9 +77,10 @@ docker run -d -p 8080:80 ghcr.io/vladkens/badges:latest
 
 ## Live Integrations
 
-- **Languages & Packages**: `JS/TS (npm)`, `Python (PyPI)`, `Rust (Cargo)`, `Ruby (Gems)`, `PHP (Packagist)`, `Dart (Pub)`, `Haskell (Cabal)`, `C#/F# (NuGet)`, `Clojure (Clojars)` ⏳, `Elixir (Hex)` ⏳
+- **Languages & Packages**: `JS/TS (npm)`, `Python (PyPI)`, `Rust (Cargo)`, `Ruby (Gems)`, `PHP (Packagist)`, `Dart (Pub)`, `Haskell (Cabal)`, `C#/F# (NuGet)`, `Swift / ObjC (CocoaPods)`, `Clojure (Clojars)`, `Elixir (Hex)`, `Puppet Forge` ⏳
 - **Marketplaces**: `Homebrew`, `VSCode Marketplace`, `Chrome Web Store`, `Firefox Add-ons`, `JetBrains Plugins`
-- **Services & CI/CD**: `GitHub`, `Docker Hub` ⏳, `GitLab` ⏳
+- **Services & CI/CD**: `GitHub`, `Docker Hub` ⏳, `GitLab` ⏳, `ReadTheDocs`
+- **Communication**: `Discord`
 
 *(⏳ = Coming Soon)*
 

@@ -12,7 +12,7 @@
   },  
   "rust-analyzer.cargo.targetDir": true,
   "editor.formatOnSave": true,
-  "files.exclude": { "Cargo.lock": true, "target": true },
+  "files.exclude": { "Cargo.lock": true, "target": true, "vendor": true },
   "evenBetterToml.formatter.columnWidth": 100,
   "code-runner.executorMap": {
     "rust": "cargo run -r #$fileName"

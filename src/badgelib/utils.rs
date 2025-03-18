@@ -50,7 +50,7 @@ pub fn render_stars(score: f64, max_score: f64) -> String {
 pub fn millify(n: u64) -> String {
   let mut n = n as f64;
   let mut i = 0;
-  let units = ["", "K", "M", "B", "T"];
+  let units = ["", "k", "M", "B", "T"];
   while n >= 1_000.0 {
     n /= 1_000.0;
     i += 1;
@@ -59,6 +59,22 @@ pub fn millify(n: u64) -> String {
   let label = format!("{n:.1}");
   let label = label.strip_suffix(".0").unwrap_or(&label);
   let label = format!("{label}{}", units[i]);
+  label
+}
+
+// https://www.npmjs.com/package/byte-size
+pub fn millify_iec(n: u64) -> String {
+  let mut n = n as f64;
+  let mut i = 0;
+  let units = ["", "KiB", "MiB", "GiB", "TiB"];
+  while n >= 1_024.0 {
+    n /= 1_024.0;
+    i += 1;
+  }
+
+  let label = format!("{n:.1}");
+  let label = label.strip_suffix(".0").unwrap_or(&label);
+  let label = format!("{label} {}", units[i]);
   label
 }
 

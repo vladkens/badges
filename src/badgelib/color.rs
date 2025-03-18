@@ -1,4 +1,5 @@
 use serde::{Deserialize, Deserializer};
+use std::str::FromStr;
 
 // From: https://github.com/badgen/badgen/blob/master/src/color-presets.ts
 #[derive(Debug, PartialEq, Clone, Default, strum::EnumIter, serde::Serialize)]
@@ -107,5 +108,13 @@ impl<'de> Deserialize<'de> for Color {
   fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
     let s = String::deserialize(deserializer)?;
     Self::from_str(&s).map_err(serde::de::Error::custom)
+  }
+}
+
+impl FromStr for Color {
+  type Err = &'static str;
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    Color::from_str(s)
   }
 }

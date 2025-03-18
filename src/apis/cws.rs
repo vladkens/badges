@@ -40,20 +40,23 @@ async fn get_data(name: String) -> Res<Data> {
 pub(crate) enum Kind {
   #[serde(rename = "v", alias = "version")]
   Version,
-  #[serde(rename = "users")]
-  Users,
-  #[serde(rename = "score")]
-  Score,
+  #[serde(rename = "rating")]
+  Rating,
+  #[serde(rename = "rating-count")]
+  RatingCount,
   #[serde(rename = "stars")]
   Stars,
+  #[serde(rename = "users")]
+  Users,
 }
 
 pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
   let rs = get_data(name).await?;
   match kind {
     Kind::Version => Ok(Badge::for_version(&qs, "chrome web store", &rs.version)?),
+    Kind::Rating => Ok(Badge::new("rating", &format!("{:.1}/5", rs.score), Color::DefaultValue)),
+    Kind::RatingCount => Ok(Badge::for_count(&qs, "ratings", rs.score_count)?),
     Kind::Users => Ok(Badge::new("users", &rs.users, Color::DefaultValue)),
-    Kind::Score => Ok(Badge::new("score", &format!("{:.1}/5", rs.score), Color::DefaultValue)),
     Kind::Stars => Ok(Badge::new("stars", &render_stars(rs.score, 5.0), Color::DefaultValue)),
   }
 }

@@ -114,7 +114,9 @@ fn layout(title: Option<&str>, node: Markup) -> Markup {
           a target="_blank" href="https://github.com/vladkens/badges" {
             button class="outline secondary" {
               img src="https://cdn.simpleicons.org/github/black/white"
-                style="width: 24px; height: 24px; margin-top: -5px" {}
+                style="width: 24px; height: 24px; margin-top: -5px; margin-right: 8px;" {}
+
+              "View on GitHub"
             }
           }
         }
@@ -1090,15 +1092,18 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
     section {
       (heading(3, "Integrations"))
       (render_tbox("Static", static_examples))
+      (render_enum::<apis::npm::Kind>("NPM", "/npm/{}/apigen-ts"))
       (render_enum::<apis::pypi::Kind>("PyPI", "/pypi/{}/twscrape"))
-      (render_enum::<apis::npm::Kind>("npm", "/npm/{}/apigen-ts"))
-      (render_enum::<apis::packagephobia::Kind>("packagephobia", "/packagephobia/{}/apigen-ts"))
-      (render_enum::<apis::crates::Kind>("crates.io", "/crates/{}/tokio"))
-      (render_enum::<apis::packagist::Kind>("Packagist", "/packagist/{}/laravel/laravel"))
+      (render_enum::<apis::crates::Kind>("Crates.io", "/crates/{}/tokio"))
+      (render_enum::<apis::dartpub::Kind>("Dart Pub", "/pub/{}/dio"))
       (render_enum::<apis::gems::Kind>("Ruby Gems", "/gem/{}/rails"))
-      (render_enum::<apis::dart_pub::Kind>("Dart Pub", "/pub/{}/dio"))
       (render_enum::<apis::hackage::Kind>("Hackage", "/hackage/{}/servant"))
+      (render_enum::<apis::hexpm::Kind>("Hex", "/hexpm/{}/jason"))
       (render_enum::<apis::nuget::Kind>("NuGet", "/nuget/{}/Newtonsoft.Json"))
+      (render_enum::<apis::packagephobia::Kind>("Packagephobia", "/packagephobia/{}/apigen-ts"))
+      (render_enum::<apis::packagist::Kind>("Packagist", "/packagist/{}/laravel/laravel"))
+      (render_enum::<apis::clojars::Kind>("Clojars", "/clojars/{}/metosin/jsonista"))
+      (render_enum::<apis::cocoapods::Kind>("CocoaPods", "/cocoapods/{}/SwiftyJSON"))
       (render_enum::<apis::homebrew::Kind>("Homebrew", "/homebrew/{}/macmon"))
       (render_enum::<apis::homebrew::Kind>("Homebrew Cask", "/homebrew/{}/cask/firefox"))
       (render_enum::<apis::vscode::Kind>("VS Code", "/vscode/{}/esbenp.prettier-vscode"))

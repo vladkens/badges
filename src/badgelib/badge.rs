@@ -8,7 +8,7 @@ use maud::html;
 
 use super::_icons::ICONS;
 use super::Color;
-use super::utils::{cacl_width, millify, to_min_ver};
+use super::utils::{cacl_width, millify, millify_iec, to_min_ver};
 
 pub type Res<T = ()> = anyhow::Result<T>;
 pub type Dict = HashMap<String, String>;
@@ -158,9 +158,12 @@ impl Badge {
 
   pub fn from_qs_with(qs: &Dict, label: &str, value: &str, value_color: Color) -> Res<Badge> {
     let mut badge = Badge::from_qs(qs)?;
-    badge.llabel = Some(label.to_string());
+    badge.llabel = if badge.llabel.is_none() { Some(label.to_string()) } else { badge.llabel };
     badge.rlabel = value.to_string();
-    badge.rcolor = value_color;
+    badge.rcolor = match badge.rcolor {
+      Color::DefaultValue => value_color,
+      _ => badge.rcolor,
+    };
     Ok(badge)
   }
 
@@ -236,6 +239,19 @@ impl Badge {
 
     badge.llabel = if badge.llabel.is_none() { Some(label.to_string()) } else { badge.llabel };
     badge.rlabel = millify(value);
+    badge.rcolor = match badge.rcolor {
+      Color::DefaultValue => Color::Blue,
+      _ => badge.rcolor,
+    };
+
+    Ok(badge)
+  }
+
+  pub fn for_size(qs: &Dict, label: &str, bytes: u64) -> Res<Badge> {
+    let mut badge = Badge::from_qs(qs)?;
+
+    badge.llabel = if badge.llabel.is_none() { Some(label.to_string()) } else { badge.llabel };
+    badge.rlabel = millify_iec(bytes);
     badge.rcolor = match badge.rcolor {
       Color::DefaultValue => Color::Blue,
       _ => badge.rcolor,

@@ -1,12 +1,16 @@
 #![forbid(absolute_paths_not_starting_with_crate)]
 pub(crate) mod amo;
+pub(crate) mod clojars;
+pub(crate) mod cocoapods;
 pub(crate) mod crates;
 pub(crate) mod cws;
-pub(crate) mod dart_pub;
+pub(crate) mod dartpub;
+pub(crate) mod discord;
 pub(crate) mod fixed;
 pub(crate) mod gems;
 pub(crate) mod github;
 pub(crate) mod hackage;
+pub(crate) mod hexpm;
 pub(crate) mod homebrew;
 pub(crate) mod jetbrains;
 pub(crate) mod npm;
