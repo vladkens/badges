@@ -134,7 +134,7 @@ impl Badge {
       .min(12);
 
     let scale = qs.get("scale").and_then(|x| x.parse::<f32>().ok()).unwrap_or(1.0).clamp(0.1, 8.0);
-    let cache = qs_first(qs, &["cache", "cacheSeconds"])
+    let cache = qs_first(qs, &["cache", "cacheSeconds", "maxAge"])
       .and_then(|x| x.parse::<u32>().ok())
       .unwrap_or(DEFAULT_CACHE)
       .clamp(300, DEFAULT_CACHE * 7);

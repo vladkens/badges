@@ -1104,6 +1104,8 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
       (render_enum::<apis::packagist::Kind>("Packagist", "/packagist/{}/laravel/laravel"))
       (render_enum::<apis::clojars::Kind>("Clojars", "/clojars/{}/metosin/jsonista"))
       (render_enum::<apis::cocoapods::Kind>("CocoaPods", "/cocoapods/{}/SwiftyJSON"))
+      (render_enum::<apis::puppetforge::Kind>("Puppet Forge", "/puppetforge/{}/puppetlabs/puppetdb"))
+      (render_enum::<apis::cpan::Kind>("CPAN", "/cpan/{}/PerlPowerTools"))
       (render_enum::<apis::homebrew::Kind>("Homebrew", "/homebrew/{}/macmon"))
       (render_enum::<apis::homebrew::Kind>("Homebrew Cask", "/homebrew/{}/cask/firefox"))
       (render_enum::<apis::vscode::Kind>("VS Code", "/vscode/{}/esbenp.prettier-vscode"))

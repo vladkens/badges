@@ -127,7 +127,19 @@ pub(crate) enum Kind {
   LangSize,
 }
 
-pub async fn handler(Path((kind, name)): Path<(Kind, String)>, Query(qs): Query<Dict>) -> BadgeRep {
+#[derive(Deserialize)]
+pub(crate) struct Params {
+  kind: Kind,
+  user: String,
+  repo: String,
+}
+
+pub async fn handler(
+  Path(Params { kind, user, repo }): Path<Params>,
+  Query(qs): Query<Dict>,
+) -> BadgeRep {
+  let name = format!("{user}/{repo}");
+
   match kind {
     Kind::Release => Ok(Badge::for_version(&qs, "release", &get_release(name).await?.version)?),
     Kind::AssetsDl => Ok(Badge::for_dl(&qs, DlPeriod::Total, get_release(name).await?.dlt)?),
