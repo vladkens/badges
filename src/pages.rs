@@ -73,16 +73,44 @@ fn render_enum<T: IntoEnumIterator + std::fmt::Display + serde::Serialize>(
 // MARK: Layouts
 
 fn layout(title: Option<&str>, node: Markup) -> Markup {
-  let build = env!("CARGO_PKG_VERSION");
   let title = match title {
-    Some(title) => format!("{title} - {DEFAULT_TITLE}"),
-    None => DEFAULT_TITLE.into(),
+    Some(title) => format!("{title} · {DEFAULT_TITLE}"),
+    None => format!("{DEFAULT_TITLE} · Elegant badges for your standout projects"),
   };
+  let descr = "Generate beautiful, fast and lightweight badges for your GitHub repos, documentation and projects. Supports npm, PyPI, GitHub and 15+ other platforms.";
+  let build = env!("CARGO_PKG_VERSION");
 
   let head = html! {
     meta charset="utf-8" {}
     meta name="viewport" content="width=device-width, initial-scale=1" {}
+
+    // Primary Meta Tags
     title { (title) }
+    meta name="title" content=(title) {}
+    meta name="description" content=(descr) {}
+
+    // Open Graph / X Meta Tags
+    meta property="og:type" content="website" {}
+    meta property="og:url" content="https://badges.ws/" {}
+    meta property="og:title" content=(title) {}
+    meta property="og:description" content=(descr) {}
+    meta property="og:image" content="/assets/social-preview.png" {}
+    meta property="twitter:card" content="summary_large_image" {}
+    meta property="twitter:url" content="https://badges.ws/" {}
+    meta property="twitter:title" content=(title) {}
+    meta property="twitter:description" content=(descr) {}
+    meta property="twitter:image" content="/assets/social-preview.png" {}
+    link rel="icon" type="image/svg+xml" href="/assets/logo.svg" {}
+    // link rel="icon" type="image/png" href="/assets/favicon.png" {}
+    // link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" {}
+
+    // Additional Meta Tags
+    meta name="theme-color" content="#ffffff" {}
+    meta name="robots" content="index, follow" {}
+    meta name="google" content="notranslate" {}
+    meta name="keywords" content="badges, github badges, npm badges, pypi badges, shields, markdown badges, readme badges, repository badges" {}
+    meta name="author" content="badges.ws team" {}
+    link rel="canonical" href="https://badges.ws/" {}
 
     // link rel="preconnect" href="https://unpkg.com" {}
     // link rel="stylesheet" href="https://unpkg.com/@picocss/pico@2/css/pico.min.css" {}
@@ -127,7 +155,18 @@ fn layout(title: Option<&str>, node: Markup) -> Markup {
 
     footer class="text-center" {
       hr {}
-      small { "© " (chrono::Local::now().year()) " · v" (env!("CARGO_PKG_VERSION")) " · Made with 🍆 by Badges.ws team" }
+
+      div style="display: flex; justify-content: center; align-items: center; gap: 16px; padding-bottom: 10px" {
+        a target="_blank" href="https://startupfa.me/s/badgesws?utm_source=badges.ws" {
+          img src="https://startupfa.me/badges/featured-badge.webp" alt="Featured on Startup Fame" width="171" height="54" {}
+        }
+
+        a target="_blank" href="https://twelve.tools?utm_source=badges.ws" {
+          img src="https://twelve.tools/badge0-light.svg" alt="Featured on Twelve Tools" width="200" height="54" {}
+        }
+      }
+
+      small { "© " (chrono::Local::now().year()) " · Made by " a target="_blank" href="https://vladkens.cc" { "Badges.ws" } " team." }
     }
   };
 
@@ -1113,6 +1152,7 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
       (render_enum::<apis::cws::Kind>("Chrome Web Store", "/cws/{}/epcnnfbjfcgphgdmggkamkmgojdagdnn"))
       (render_enum::<apis::jetbrains::Kind>("JetBrains Plugin", "/jetbrains/{}/22282"))
       (render_enum::<apis::github::Kind>("GitHub", "/github/{}/vladkens/macmon"))
+      (render_enum::<apis::docker::Kind>("Docker", "/docker/{}/grafana/grafana"))
     }
   };
 
