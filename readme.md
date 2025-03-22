@@ -1,6 +1,6 @@
 # badges.ws · Elegant badges for your standout projects 
 
-<picture><img src="assets/logo.svg" align="right" width="128" /></picture>
+<picture><img src="app/assets/logo.svg" align="right" width="128" /></picture>
 
 <!-- [<img src="https://badges.ws/badge/status-production-green" />](https://badges.ws) -->
 [<img src="https://badges.ws/badge/status-beta-yellow" />](https://badges.ws)
