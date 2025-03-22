@@ -3,15 +3,24 @@ tag=badges
 dev:
 	watchexec -rc -e rs -- cargo run
 
+fmt:
+	cargo fix --allow-dirty --allow-staged
+	cargo +nightly fmt
+
+check: lint test
+
 lint:
-	cargo fmt --check
-	cargo clippy --all-targets --all-features -- -D warnings
-	cargo check --release --locked
+	cargo +nightly fmt --check
+	cargo clippy --workspace --all-targets --all-features -- -D warnings
+	cargo check --workspace --release --locked
+
+test:
+	cargo test --workspace --all-features --locked
 
 update:
 	git submodule update --init --recursive
 	git submodule foreach 'git fetch --tags && git checkout $(git describe --tags)'
-	rm -rf src/badgelib/_icons.rs src/badgelib/_width.rs
+	rm -rf badgelib/src/_icons.rs badgelib/src/_width.rs
 	cargo upgrade -i
 
 deploy:

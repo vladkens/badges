@@ -10,12 +10,19 @@
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 99
   },  
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },  
   "rust-analyzer.cargo.targetDir": true,
   "editor.formatOnSave": true,
-  "files.exclude": { "Cargo.lock": true, "target": true, "vendor": true },
   "evenBetterToml.formatter.columnWidth": 100,
   "code-runner.executorMap": {
     "rust": "cargo run -r #$fileName"
+  },
+  "files.exclude": {
+    "Cargo.lock": true,
+    "target": true,
+    "**/vendor": true
   },
   "search.exclude": {
     "**/vendor": true,

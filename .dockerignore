@@ -1,5 +1,5 @@
 *
 !Cargo.toml
 !Cargo.lock
-!src/
-!assets/
+!app/
+!badgelib/

@@ -25,9 +25,8 @@ jobs:
             target/
 
       - run: rustup update --no-self-update stable && rustup default stable
-      - run: cargo fmt --check
-      - run: cargo check --release --locked
-      - run: cargo test
+      - run: make lint
+      - run: make test
 
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
