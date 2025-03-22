@@ -24,7 +24,11 @@ jobs:
             ~/.cargo/git/db/
             target/
 
-      - run: rustup update --no-self-update stable && rustup default stable
+      - name: Install Rust toolchains 
+        run: |
+          rustup update --no-self-update stable nightly
+          rustup default stable
+          rustup component add clippy rustfmt --toolchain nightly
       - run: make lint
       - run: make test
 

@@ -3,7 +3,7 @@ tag=badges
 dev:
 	watchexec -rc -e rs -- cargo run
 
-fmt:
+lint-fix:
 	cargo fix --allow-dirty --allow-staged
 	cargo +nightly fmt
 
