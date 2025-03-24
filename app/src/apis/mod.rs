@@ -24,8 +24,16 @@ pub(crate) mod puppetforge;
 pub(crate) mod pypi;
 pub(crate) mod readthedocs;
 pub(crate) mod vscode;
+pub(crate) mod youtube;
 
 pub(crate) fn get_client() -> reqwest::Client {
   let ua = format!("{}/{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
   reqwest::Client::builder().user_agent(ua).build().unwrap()
+}
+
+pub(crate) fn get_env(key: &str) -> anyhow::Result<String> {
+  match std::env::var(key) {
+    Ok(val) => Ok(val),
+    Err(_) => anyhow::bail!("{} is not set", key),
+  }
 }

@@ -33,7 +33,7 @@ pub(crate) enum Kind {
   #[serde(rename = "v", alias = "version")]
   Version,
   #[serde(rename = "dm")]
-  Monthly,
+  DlMonth,
   #[serde(rename = "dy")]
   Yearly,
 }
@@ -45,7 +45,7 @@ pub async fn formula_handler(
   let rs = get_data("formula".into(), name).await?;
   match kind {
     Kind::Version => Ok(badge.for_version("homebrew", &rs.version)),
-    Kind::Monthly => Ok(badge.for_downloads(Period::Month, rs.dlm)),
+    Kind::DlMonth => Ok(badge.for_downloads(Period::Month, rs.dlm)),
     Kind::Yearly => Ok(badge.for_downloads(Period::Year, rs.dly)),
   }
 }
@@ -57,7 +57,7 @@ pub async fn cask_handler(
   let rs = get_data("cask".into(), name).await?;
   match kind {
     Kind::Version => Ok(badge.for_version("homebrew", &rs.version)),
-    Kind::Monthly => Ok(badge.for_downloads(Period::Month, rs.dlm)),
+    Kind::DlMonth => Ok(badge.for_downloads(Period::Month, rs.dlm)),
     Kind::Yearly => Ok(badge.for_downloads(Period::Year, rs.dly)),
   }
 }

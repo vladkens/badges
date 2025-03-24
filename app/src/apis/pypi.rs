@@ -98,11 +98,11 @@ pub(crate) enum Kind {
   #[serde(rename = "l", alias = "license")]
   License,
   #[serde(rename = "dw")]
-  Weekly,
+  DlWeek,
   #[serde(rename = "dm")]
-  Monthly,
+  DlMonth,
   #[serde(rename = "dt")]
-  Total,
+  DlTotal,
   #[serde(rename = "python")]
   Python,
   #[serde(rename = "wheel")]
@@ -118,11 +118,11 @@ pub async fn handler(
   Query(badge): Query<Badge>,
 ) -> BadgeRep {
   match kind {
-    Kind::Total => return Ok(badge.for_downloads(Period::Total, get_dl_total(name).await?)),
-    Kind::Weekly => {
+    Kind::DlTotal => return Ok(badge.for_downloads(Period::Total, get_dl_total(name).await?)),
+    Kind::DlWeek => {
       return Ok(badge.for_downloads(Period::Week, get_dl_granular(name).await?.0));
     }
-    Kind::Monthly => {
+    Kind::DlMonth => {
       return Ok(badge.for_downloads(Period::Month, get_dl_granular(name).await?.1));
     }
     _ => {}
@@ -130,7 +130,7 @@ pub async fn handler(
 
   let rs = get_data(name).await?;
   match kind {
-    Kind::Total | Kind::Weekly | Kind::Monthly => unreachable!(),
+    Kind::DlTotal | Kind::DlWeek | Kind::DlMonth => unreachable!(),
     Kind::Version => Ok(badge.for_version("pypi", &rs.version)),
     Kind::License => Ok(badge.for_license(&rs.license)),
     Kind::Python => {

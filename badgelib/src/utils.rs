@@ -96,3 +96,15 @@ pub(crate) fn text_color(bg_color: &Color) -> Color {
   // println!("Luminance: {}", luminance);
   if luminance > 0.85 { Color::Black } else { Color::White }
 }
+
+pub(crate) fn rating_color<T: Into<f64>>(value: T, max_value: T) -> Color {
+  let (value, max_value) = (value.into(), max_value.into());
+
+  match value {
+    x if x >= max_value * 0.80 => Color::Green,
+    x if x >= max_value * 0.60 => Color::YellowGreen,
+    x if x >= max_value * 0.40 => Color::Yellow,
+    x if x >= max_value * 0.20 => Color::Orange,
+    _ => Color::Red,
+  }
+}

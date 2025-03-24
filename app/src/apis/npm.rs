@@ -28,9 +28,9 @@ async fn get_data(name: String) -> Res<NpmData> {
 async fn get_downloads(name: String, kind: Kind) -> Res<u64> {
   let url = "https://api.npmjs.org/downloads";
   let url = match kind {
-    Kind::Weekly => format!("{url}/range/last-week/{name}"),
-    Kind::Monthly => format!("{url}/range/last-month/{name}"),
-    Kind::Total => format!("{url}/range/2005-01-01:2030-01-01/{name}"),
+    Kind::DlWeek => format!("{url}/range/last-week/{name}"),
+    Kind::DlMonth => format!("{url}/range/last-month/{name}"),
+    Kind::DlTotal => format!("{url}/range/2005-01-01:2030-01-01/{name}"),
     _ => unreachable!(),
   };
 
@@ -52,11 +52,11 @@ pub(crate) enum Kind {
   #[serde(rename = "l", alias = "license")]
   License,
   #[serde(rename = "dw")]
-  Weekly,
+  DlWeek,
   #[serde(rename = "dm")]
-  Monthly,
+  DlMonth,
   #[serde(rename = "dt")]
-  Total,
+  DlTotal,
 }
 
 pub async fn handler(
@@ -69,8 +69,8 @@ pub async fn handler(
   match kind {
     Kind::Version => Ok(badge.for_version("npm", &get_data(name).await?.version)),
     Kind::License => Ok(badge.for_license(&get_data(name).await?.license)),
-    Kind::Weekly => Ok(badge.for_downloads(Period::Week, get_downloads(name, kind).await?)),
-    Kind::Monthly => Ok(badge.for_downloads(Period::Month, get_downloads(name, kind).await?)),
-    Kind::Total => Ok(badge.for_downloads(Period::Total, get_downloads(name, kind).await?)),
+    Kind::DlWeek => Ok(badge.for_downloads(Period::Week, get_downloads(name, kind).await?)),
+    Kind::DlMonth => Ok(badge.for_downloads(Period::Month, get_downloads(name, kind).await?)),
+    Kind::DlTotal => Ok(badge.for_downloads(Period::Total, get_downloads(name, kind).await?)),
   }
 }

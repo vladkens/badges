@@ -39,7 +39,7 @@ pub(crate) enum Kind {
   #[serde(rename = "l", alias = "license")]
   License,
   #[serde(rename = "dw")]
-  Weekly,
+  DlWeek,
   #[serde(rename = "rating")]
   Rating,
   #[serde(rename = "users")]
@@ -54,7 +54,7 @@ pub async fn handler(
   match kind {
     Kind::Version => Ok(badge.for_version("mozilla add-on", &rs.version)),
     Kind::License => Ok(badge.for_license(&rs.license)),
-    Kind::Weekly => Ok(badge.for_downloads(Period::Week, rs.dlw)),
+    Kind::DlWeek => Ok(badge.for_downloads(Period::Week, rs.dlw)),
     Kind::Rating => Ok(badge.for_rating("rating", rs.rating, 5.0)),
     Kind::Users => Ok(badge.for_count("users", rs.users)),
   }

@@ -5,7 +5,9 @@ use crate::Color;
 #[cfg(feature = "axum")]
 use crate::param::Format;
 use crate::param::{Period, Style};
-use crate::utils::{cacl_width, empty_string_as_none, get_icon, millify, millify_iec, text_color};
+use crate::utils::{
+  cacl_width, empty_string_as_none, get_icon, millify, millify_iec, rating_color, text_color,
+};
 
 #[cfg(feature = "axum")]
 fn default_cache() -> u32 {
@@ -166,12 +168,12 @@ impl Badge {
   pub fn for_rating(mut self, label: &str, value: f64, max_value: f64) -> Self {
     self.label = self.label.or(Some(label.into()));
     self.value = Some(format!("{:.1}/{}", value, max_value));
-    self.value_color = Some(Color::Blue);
+    self.value_color = Some(rating_color(value, max_value));
     self
   }
 
   pub fn for_stars(mut self, label: &str, value: f64, max_value: f64) -> Self {
-    let value = {
+    let stars = {
       let scale = max_value / 5.0;
       let score = value / scale;
 
@@ -189,8 +191,8 @@ impl Badge {
     };
 
     self.label = self.label.or(Some(label.into()));
-    self.value = Some(value);
-    self.value_color = Some(Color::Blue);
+    self.value = Some(stars);
+    self.value_color = Some(rating_color(value, max_value));
     self
   }
 
@@ -269,11 +271,8 @@ impl Badge {
     let radius = self.radius.unwrap_or(if self.style == Style::Flat { 3 } else { 0 }).min(12);
     let radius = (fz / 12.0) * radius as f32;
 
-    let svg = maud::html!(svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox=(format!("0 0 {} {}", w, h))
-      width=(ww) height=(hh)
-      role="img" aria-label=(title)
+    let svg = maud::html!(svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label=(title)
+      viewBox=(format!("0 0 {} {}", w, h)) width=(ww) height=(hh) text-rendering="geometricPrecision"
     {
       title { (title) }
 
@@ -298,9 +297,7 @@ impl Badge {
         image x=(pad) y=((h-iw)/2.0) width=(iw) height=(iw) href=(icon.unwrap()) {}
       }
 
-      g font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size=(fz)
-        aria-hidden="true" text-rendering="geometricPrecision"
-      {
+      g font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size=(fz) aria-hidden="true" {
         @if has_text {
           text textLength=(ltw) x=(lx+outx) y=(y+outy) fill="#000" opacity="0.25" { (&ltext) }
           text textLength=(ltw) x=(lx) y=(y) fill=(lt_color) { (&ltext) }

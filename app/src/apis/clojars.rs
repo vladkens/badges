@@ -41,7 +41,7 @@ pub(crate) enum Kind {
   #[serde(rename = "l", alias = "license")]
   License,
   #[serde(rename = "dt")]
-  Total,
+  DlTotal,
 }
 
 pub async fn handler(
@@ -56,6 +56,6 @@ pub async fn handler(
       Ok(badge.for_version("clojars", &rs.version).value(&format!(r#"[{name} "{}"]"#, rs.version)))
     }
     Kind::License => Ok(badge.for_license(&rs.license)),
-    Kind::Total => Ok(badge.for_downloads(Period::Total, rs.dlt)),
+    Kind::DlTotal => Ok(badge.for_downloads(Period::Total, rs.dlt)),
   }
 }

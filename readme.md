@@ -80,7 +80,7 @@ docker run -d -p 8080:80 ghcr.io/vladkens/badges:latest
 - **Languages & Packages**: `JS/TS (npm)`, `Python (PyPI)`, `Rust (Cargo)`, `Ruby (Gems)`, `PHP (Packagist)`, `Dart (Pub)`, `Haskell (Cabal)`, `C#/F# (NuGet)`, `Swift / ObjC (CocoaPods)`, `Clojure (Clojars)`, `Elixir (Hex)`, `Puppet Forge`, `Perl (CPAN)`
 - **Marketplaces**: `Homebrew`, `VSCode Marketplace`, `Chrome Web Store`, `Firefox Add-ons`, `JetBrains Plugins`
 - **Services & CI/CD**: `GitHub`, `GitLab` ⏳, `Docker Hub`, `CodeCov`, `ReadTheDocs`
-- **Communication**: `Discord`
+- **Community**: `Discord`, `YouTube`
 
 *(⏳ = Coming Soon)*
 

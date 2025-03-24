@@ -1166,6 +1166,12 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
       (render_enum::<apis::github::Kind>("GitHub", "/github/{}/vladkens/macmon"))
       (render_enum::<apis::docker::Kind>("Docker", "/docker/{}/grafana/grafana"))
     }
+
+    section {
+      (heading(3, "Community"))
+      (render_enum::<apis::youtube::KindChannel>("YouTube Channel", "/youtube/channel/{}/UC8ENHE5xdFSwx71u3fDH5Xw"))
+      (render_enum::<apis::youtube::KindVideo>("YouTube Video", "/youtube/{}/dQw4w9WgXcQ"))
+    }
   };
 
   Ok(layout(None, node))

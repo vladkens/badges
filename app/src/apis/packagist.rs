@@ -9,13 +9,15 @@ use super::get_client;
 use crate::server::{BadgeRep, Res};
 
 #[derive(Debug, Clone)]
-struct PackageData {
+struct Data {
   version: String,
   license: String,
-  dlt: u64,
   dlw: u64,
   dlm: u64,
+  dlt: u64,
   php_ver: String,
+  stars: u64,
+  dependents: u64,
 }
 
 fn parse_versions(
@@ -30,7 +32,7 @@ fn parse_versions(
 }
 
 #[cached(time = 60, result = true)]
-async fn get_data(name: String) -> Res<PackageData> {
+async fn get_data(name: String) -> Res<Data> {
   let url = format!("https://packagist.org/packages/{name}.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -54,7 +56,10 @@ async fn get_data(name: String) -> Res<PackageData> {
   let license = latest["license"][0].as_str().unwrap_or("unknown").to_string();
   let php_ver = latest["require"]["php"].as_str().unwrap_or("unknown").to_string();
 
-  Ok(PackageData { version, license, dlt, dlw, dlm, php_ver })
+  let stars = dat["favers"].as_u64().unwrap_or(0);
+  let dependents = dat["dependents"].as_u64().unwrap_or(0);
+
+  Ok(Data { version, license, dlt, dlw, dlm, php_ver, stars, dependents })
 }
 
 #[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display)]
@@ -65,13 +70,17 @@ pub(crate) enum Kind {
   #[serde(rename = "l", alias = "license")]
   License,
   #[serde(rename = "dw")]
-  Weekly,
+  DlWeek,
   #[serde(rename = "dm")]
-  Monthly,
+  DlMonth,
   #[serde(rename = "dt")]
-  Total,
+  DlTotal,
   #[serde(rename = "php")]
   PHP,
+  #[serde(rename = "stars")]
+  Stars,
+  #[serde(rename = "dependents")]
+  Dependents,
 }
 
 pub async fn handler(
@@ -82,9 +91,11 @@ pub async fn handler(
   match kind {
     Kind::Version => Ok(badge.for_version("packagist", &rs.version)),
     Kind::License => Ok(badge.for_license(&rs.license)),
-    Kind::Weekly => Ok(badge.for_downloads(Period::Week, rs.dlw)),
-    Kind::Monthly => Ok(badge.for_downloads(Period::Month, rs.dlm)),
-    Kind::Total => Ok(badge.for_downloads(Period::Total, rs.dlt)),
+    Kind::DlWeek => Ok(badge.for_downloads(Period::Week, rs.dlw)),
+    Kind::DlMonth => Ok(badge.for_downloads(Period::Month, rs.dlm)),
+    Kind::DlTotal => Ok(badge.for_downloads(Period::Total, rs.dlt)),
     Kind::PHP => Ok(badge.label("php").value(&rs.php_ver)),
+    Kind::Stars => Ok(badge.for_count("stars", rs.stars)),
+    Kind::Dependents => Ok(badge.for_count("dependents", rs.dependents)),
   }
 }

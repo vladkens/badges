@@ -24,6 +24,8 @@ macro_rules! redirect {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+  dotenvy::dotenv().ok();
+
   let env_filter = tracing_subscriber::EnvFilter::builder()
     .with_default_directive(tracing::Level::INFO.into())
     .from_env_lossy();
@@ -70,6 +72,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .route("/docker/{kind}/{user}/{repo}/{tag}", get(apis::docker::handler))
     .route("/readthedocs/{name}", get(apis::readthedocs::handler))
     .route("/discord/{name}", get(apis::discord::handler))
+    .route("/youtube/channel/{kind}/{cid}", get(apis::youtube::channel_handler))
+    .route("/youtube/{kind}/{vid}", get(apis::youtube::video_handler))
     .route("/badge", get(apis::fixed::handler1))
     .route("/badge/{config}", get(apis::fixed::handler2))
     .route("/badge/{label}/{value}/{color}", get(apis::fixed::handler3));

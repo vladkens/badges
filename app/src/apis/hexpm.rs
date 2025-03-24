@@ -48,11 +48,11 @@ pub(crate) enum Kind {
   #[serde(rename = "l", alias = "license")]
   License,
   #[serde(rename = "dw")]
-  Weekly,
+  DlWeek,
   #[serde(rename = "dm")]
-  Monthly,
+  DlMonth,
   #[serde(rename = "dt")]
-  Total,
+  DlTotal,
 }
 
 pub async fn handler(
@@ -63,8 +63,8 @@ pub async fn handler(
   match kind {
     Kind::Version => Ok(badge.for_version("hex", &rs.version)),
     Kind::License => Ok(badge.for_license(&rs.license)),
-    Kind::Weekly => Ok(badge.for_downloads(Period::Week, rs.dlw)),
-    Kind::Monthly => Ok(badge.for_downloads(Period::Month, rs.dlm)),
-    Kind::Total => Ok(badge.for_downloads(Period::Total, rs.dlt)),
+    Kind::DlWeek => Ok(badge.for_downloads(Period::Week, rs.dlw)),
+    Kind::DlMonth => Ok(badge.for_downloads(Period::Month, rs.dlm)),
+    Kind::DlTotal => Ok(badge.for_downloads(Period::Total, rs.dlt)),
   }
 }

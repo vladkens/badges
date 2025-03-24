@@ -31,8 +31,8 @@ pub(crate) enum Kind {
   #[serde(rename = "version", alias = "v")]
   Version,
   #[serde(rename = "dt")]
-  Total,
-  #[serde(rename = "score")]
+  DlTotal,
+  #[serde(rename = "score", alias = "f")]
   Score,
 }
 
@@ -43,7 +43,7 @@ pub async fn handler(
   let rs = get_data(name.replace("/", "-")).await?;
   match kind {
     Kind::Version => Ok(badge.for_version("puppetforge", &rs.ver)),
-    Kind::Total => Ok(badge.for_downloads(Period::Total, rs.dlt)),
+    Kind::DlTotal => Ok(badge.for_downloads(Period::Total, rs.dlt)),
     Kind::Score => Ok(badge.label("quality score").value(&format!("{}%", rs.score))),
   }
 }

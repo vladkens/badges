@@ -26,7 +26,7 @@ async fn get_data(name: String) -> Res<Base> {
   let license = dat["license"]["spdx_id"].as_str().unwrap_or("unknown").to_string();
   let stars = dat["stargazers_count"].as_u64().unwrap_or(0);
   let forks = dat["forks_count"].as_u64().unwrap_or(0);
-  let watchers = dat["watchers_count"].as_u64().unwrap_or(0);
+  let watchers = dat["subscribers_count"].as_u64().unwrap_or(0);
   let size = dat["size"].as_u64().unwrap_or(0) * 1024; // in bytes
 
   Ok(Base { license, stars, forks, watchers, size })

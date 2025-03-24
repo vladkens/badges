@@ -33,7 +33,7 @@ pub(crate) enum Kind {
   #[serde(rename = "v", alias = "version")]
   Version,
   #[serde(rename = "dt")]
-  Total,
+  DlTotal,
 }
 
 pub async fn handler(
@@ -43,6 +43,6 @@ pub async fn handler(
   let rs = get_dl(name).await?;
   match kind {
     Kind::Version => Ok(badge.for_version("nuget", &rs.version)),
-    Kind::Total => Ok(badge.for_downloads(Period::Total, rs.dlt)),
+    Kind::DlTotal => Ok(badge.for_downloads(Period::Total, rs.dlt)),
   }
 }

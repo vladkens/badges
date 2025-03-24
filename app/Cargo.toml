@@ -9,6 +9,7 @@ axum = "0.8.1"
 badgelib = { path = "../badgelib", features = ["axum"] }
 cached = { version = "0.55.1", features = ["async"] }
 chrono = { version = "0.4.40", features = ["serde"] }
+dotenvy = "0.15.7"
 maud = { version = "0.27.0", features = ["axum"] }
 mime_guess = "2.0.5"
 regex = "1.11.1"

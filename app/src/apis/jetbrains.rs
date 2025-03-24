@@ -35,7 +35,7 @@ pub(crate) enum Kind {
   #[serde(rename = "v", alias = "version")]
   Version,
   #[serde(rename = "dt")]
-  Total,
+  DlTotal,
   #[serde(rename = "score")]
   Score, // todo: rating?
   #[serde(rename = "stars")]
@@ -48,7 +48,7 @@ pub async fn handler(
 ) -> BadgeRep {
   match kind {
     Kind::Version => Ok(badge.for_version("jetbrain plugin", &get_version(name).await?)),
-    Kind::Total => Ok(badge.for_downloads(Period::Total, get_dlt(name).await?)),
+    Kind::DlTotal => Ok(badge.for_downloads(Period::Total, get_dlt(name).await?)),
     Kind::Score => Ok(badge.for_rating("rating", get_score(name).await?, 5.0)),
     Kind::Stars => Ok(badge.for_stars("stars", get_score(name).await?, 5.0)),
   }
