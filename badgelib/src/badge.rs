@@ -200,10 +200,9 @@ impl Badge {
       0 => ("today".into(), Color::Green),
       1 => ("yesterday".into(), Color::Green),
       2..=7 => (format!("{} days ago", days), Color::Green),
-      8..=30 => (format!("{} days ago", days), Color::LightGreen),
+      8..=30 => (format!("{} days ago", days), Color::YellowGreen),
       31..=180 => (format!("{} months ago", days / 30), Color::Yellow),
-      181..=365 => (format!("{} months ago", days / 30), Color::YellowGreen),
-      366..=730 => (format!("{} year ago", days / 365), Color::Orange),
+      181..=365 => (format!("{} months ago", days / 30), Color::Orange),
       _ => (format!("{} years ago", days / 365), Color::Red),
     };
 
@@ -252,7 +251,7 @@ impl Badge {
     }
 
     let (w, h) = (lw + rw, fz * 1.75);
-    let y = h * 0.56;
+    let y = (h + fz) / 2.0 - fz / 6.0;
 
     let title = if has_text { format!("{ltext}: {rtext}") } else { rtext.to_string() };
     let (outx, outy) = (fz * 0.1 / 2.0, fz * 0.1);
@@ -300,7 +299,7 @@ impl Badge {
       }
 
       g font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size=(fz)
-        text-anchor="start" dominant-baseline="middle" text-rendering="geometricPrecision"
+        aria-hidden="true" text-rendering="geometricPrecision"
       {
         @if has_text {
           text textLength=(ltw) x=(lx+outx) y=(y+outy) fill="#000" opacity="0.25" { (&ltext) }

@@ -94,5 +94,5 @@ pub(crate) fn text_color(bg_color: &Color) -> Color {
   // Using relative luminance formula
   let luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
   // println!("Luminance: {}", luminance);
-  if luminance > 0.78 { Color::Black } else { Color::White }
+  if luminance > 0.85 { Color::Black } else { Color::White }
 }

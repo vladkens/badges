@@ -53,6 +53,6 @@ pub async fn handler(
       };
       Ok(badge.label("coverage").value(&format!("{}%", cov)).value_color(color))
     }
-    Err(_) => Ok(badge.label("coverage").value("unknown").value_color(Color::Grey)),
+    Err(_) => Ok(badge.label("coverage").value("unknown").value_color(Color::Gray)),
   }
 }

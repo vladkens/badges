@@ -153,7 +153,7 @@ pub async fn handler(
         "planning" | "pre-alpha" | "alpha" | "inactive" => Color::Red,
         "beta" => Color::Yellow,
         "stable" | "mature" => Color::Green,
-        _ => Color::Grey,
+        _ => Color::Gray,
       };
       Ok(badge.label("status").value(&rs.status).value_color(color))
     }

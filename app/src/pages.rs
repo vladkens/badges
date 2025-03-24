@@ -1080,14 +1080,12 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
 
   let colors = [
     ("color", "green"),
-    ("color", "lightgreen"),
-    ("color", "yellow"),
     ("color", "yellowgreen"),
+    ("color", "yellow"),
     ("color", "orange"),
     ("color", "red"),
     ("color", "blue"),
     ("color", "grey"),
-    ("color", "lightgrey"),
     ("color", "black"),
     ("color", "white"),
     ("or hex", "cc0000"),
