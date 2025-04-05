@@ -17,6 +17,10 @@ struct PyPiData {
   implementation: String,
 }
 
+fn parse_version<'a>(v: &'a String) -> Vec<u32> {
+  v.split('.').map(|part| part.parse::<u32>().unwrap_or(0)).collect()
+}
+
 #[cached(time = 60, result = true)]
 async fn get_data(name: String) -> Res<PyPiData> {
   // https://pypi.org/pypi?%3Aaction=list_classifiers
@@ -29,26 +33,29 @@ async fn get_data(name: String) -> Res<PyPiData> {
 
   let classifiers = dat["info"]["classifiers"]
     .as_array()
-    .map(|v| v.iter().filter_map(|x| x.as_str()).collect::<Vec<_>>())
+    .map(|x| x.iter().filter_map(|x| x.as_str()).collect::<Vec<_>>())
     .unwrap_or_default();
 
-  let pythons = classifiers
+  let mut pythons = classifiers
     .iter()
-    .filter(|v| v.starts_with("Programming Language :: Python :: "))
-    .map(|v| v.replace("Programming Language :: Python :: ", ""))
+    .filter(|x| x.starts_with("Programming Language :: Python :: "))
+    .map(|x| x.replace("Programming Language :: Python :: ", ""))
+    .filter(|x| !x.contains(" :: ")) // Drop with label, e.g.: "Python :: 3.X :: Label"
     .collect::<Vec<String>>();
+
+  pythons.sort_by_key(parse_version);
 
   let status = classifiers
     .iter()
-    .find(|v| v.starts_with("Development Status :: "))
-    .and_then(|v| v.split(" - ").last())
+    .find(|x| x.starts_with("Development Status :: "))
+    .and_then(|x| x.split(" - ").last())
     .unwrap_or("unknown")
     .to_lowercase()
     .replace("production/stable", "stable");
 
   let formats = dat["releases"][&version]
     .as_array()
-    .map(|v| v.iter().filter_map(|x| x["packagetype"].as_str()).collect::<Vec<_>>())
+    .map(|x| x.iter().filter_map(|x| x["packagetype"].as_str()).collect::<Vec<_>>())
     .unwrap_or_default();
 
   // let egg = formats.iter().any(|x| *x == "bdist_egg" || *x == "egg");

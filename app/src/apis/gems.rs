@@ -23,13 +23,13 @@ async fn get_data(name: String) -> Res<GemData> {
   let dat = rep.json::<serde_json::Value>().await?;
 
   let vers = dat.as_array().ok_or(anyhow!("no data"))?;
-  let stable = vers.iter().find(|v| !v["prerelease"].as_bool().unwrap_or(false));
+  let stable = vers.iter().find(|x| !x["prerelease"].as_bool().unwrap_or(false));
   let latest = stable.or(vers.first()).ok_or(anyhow!("no version"))?;
 
   let version = latest["number"].as_str().unwrap_or("unknown").to_string();
   let license = latest["licenses"][0].as_str().unwrap_or("unknown").to_string();
 
-  let dlt = vers.iter().map(|v| v["downloads_count"].as_u64().unwrap_or(0)).sum();
+  let dlt = vers.iter().map(|x| x["downloads_count"].as_u64().unwrap_or(0)).sum();
   let ruby_ver = latest["ruby_version"].as_str().unwrap_or("unknown").to_string();
 
   Ok(GemData { version, license, dlt, ruby_ver })

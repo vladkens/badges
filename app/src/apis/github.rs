@@ -56,8 +56,8 @@ async fn get_release(name: String) -> Res<Release> {
 #[cached(time = 60, result = true)]
 async fn last_commit(name: String) -> Res<DateTime<Utc>> {
   let url = format!("https://api.github.com/repos/{name}/commits");
-  let rep = get_client().get(&url).query(&[("per_page", "1")]);
-  let rep = rep.send().await?.error_for_status()?;
+  let req = get_client().get(&url).query(&[("per_page", "1")]);
+  let rep = req.send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
 
   dat[0]["commit"]["author"]["date"]
@@ -97,6 +97,27 @@ async fn get_lang(name: String) -> Res<LangData> {
   Ok(LangData { top_lang, top_percent, count, total })
 }
 
+#[cached(time = 60, result = true)]
+async fn get_contributors(name: String) -> Res<u64> {
+  let url = format!("https://api.github.com/repos/{name}/contributors");
+  let req = get_client().get(&url).query(&[("page", "1"), ("per_page", "1")]);
+  let rep = req.send().await?.error_for_status()?;
+
+  let link = rep.headers().get("Link").and_then(|x| x.to_str().ok()).unwrap_or("");
+  let last: u64 = link
+    .split(',')
+    .find(|x| x.contains("rel=\"last\""))
+    .and_then(|x| x.split(';').next())
+    .and_then(|x| x.trim().strip_prefix('<').and_then(|x| x.strip_suffix('>')))
+    .and_then(|x| x.split('?').last())
+    .and_then(|x| x.split('&').find(|x| x.starts_with("page=")))
+    .and_then(|x| x.split('=').last())
+    .and_then(|x| x.parse::<u64>().ok())
+    .unwrap_or(1);
+
+  Ok(last)
+}
+
 #[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display)]
 pub(crate) enum Kind {
   #[serde(rename = "release")]
@@ -121,6 +142,8 @@ pub(crate) enum Kind {
   LangCount,
   #[serde(rename = "lang-size")]
   LangSize,
+  #[serde(rename = "contributors")]
+  Contributors,
 }
 
 #[derive(Deserialize)]
@@ -139,6 +162,7 @@ pub async fn handler(
   match kind {
     Kind::Release => Ok(badge.for_version("release", &get_release(name).await?.version)),
     Kind::AssetsDl => Ok(badge.for_downloads(Period::Total, get_release(name).await?.dlt)),
+    Kind::Contributors => Ok(badge.for_count("contributors", get_contributors(name).await?)),
     Kind::License | Kind::Stars | Kind::Forks | Kind::Watchers | Kind::RepoSize => {
       let rs = get_data(name).await?;
       match kind {
