@@ -12,6 +12,7 @@ chrono = { version = "0.4.40", features = ["serde"] }
 dotenvy = "0.15.7"
 maud = { version = "0.27.0", features = ["axum"] }
 mime_guess = "2.0.5"
+pulldown-cmark = "0.13.0"
 regex = "1.11.1"
 reqwest = { version = "0.12.15", features = ["json", "rustls-tls"], default-features = false }
 rust-embed = { version = "8.6.0", features = ["axum"] }

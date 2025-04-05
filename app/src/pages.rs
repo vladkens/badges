@@ -167,7 +167,15 @@ fn layout(title: Option<&str>, node: Markup) -> Markup {
         }
       }
 
-      small { "© " (chrono::Local::now().year()) " · Made by " a target="_blank" href="https://vladkens.cc" { "Badges.ws" } " team." }
+      div style="display: flex; justify-content: center; align-items: center; gap: 16px; padding-bottom: 10px" {
+        a target="_blank" href="https://github.com/vladkens/badges" { "GitHub" }
+        a href="/privacy" { "Privacy Policy" }
+      }
+
+      small {
+        "© " (chrono::Local::now().year()) " · Made by "
+        a target="_blank" href="https://vladkens.cc" { "Badges.ws" } " team."
+      }
     }
   };
 
@@ -1046,6 +1054,24 @@ pub async fn debug() -> AnyRep<impl IntoResponse> {
   });
 
   Ok(layout(None, node))
+}
+
+fn render_markdown(content: &str) -> Markup {
+  let parser = pulldown_cmark::Parser::new(content);
+  let mut html_output = String::new();
+  pulldown_cmark::html::push_html(&mut html_output, parser);
+
+  html! {
+    div class="markdown-content" {
+      (maud::PreEscaped(html_output))
+    }
+  }
+}
+
+pub async fn privacy() -> AnyRep<impl IntoResponse> {
+  let data = include_str!("../markdown/privacy.md");
+  let node = render_markdown(data);
+  Ok(layout(Some("Privacy Policy"), node))
 }
 
 pub async fn index() -> AnyRep<impl IntoResponse> {

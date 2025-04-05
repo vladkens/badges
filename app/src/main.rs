@@ -93,6 +93,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .merge(compatibility)
     .merge(badges)
     .route("/", get(pages::index))
+    .route("/privacy", get(pages::privacy))
     .route("/debug", get(pages::debug));
 
   server::run_server(app).await
