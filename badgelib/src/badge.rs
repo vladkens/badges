@@ -256,7 +256,7 @@ impl Badge {
     let y = (h + fz) / 2.0 - fz / 6.0;
 
     let title = if has_text { format!("{ltext}: {rtext}") } else { rtext.to_string() };
-    let (outx, outy) = (fz * 0.1 / 2.0, fz * 0.1);
+    let (outx, outy) = (fz * 0.075 / 2.0, fz * 0.075);
 
     let hh = 20.0 * 1.0;
     let ww = w * hh / h;
@@ -297,7 +297,7 @@ impl Badge {
         image x=(pad) y=((h-iw)/2.0) width=(iw) height=(iw) href=(icon.unwrap()) {}
       }
 
-      g font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size=(fz) aria-hidden="true" {
+      g font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size=(fz) aria-hidden="true" {
         @if has_text {
           text textLength=(ltw) x=(lx+outx) y=(y+outy) fill="#000" opacity="0.25" { (&ltext) }
           text textLength=(ltw) x=(lx) y=(y) fill=(lt_color) { (&ltext) }

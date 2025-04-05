@@ -90,7 +90,9 @@ docker run -d -p 8080:80 ghcr.io/vladkens/badges:latest
 
 ## Credits & Inspiration
 
-This project was inspired by [Shields.io](https://github.com/badges/shields) and [Badgen.net](https://github.com/badgen/badgen.net). Icons are provided by the amazing [Simple Icons](https://simpleicons.org/) project.
+- This project was inspired by [Shields.io](https://github.com/badges/shields) and [Badgen.net](https://github.com/badgen/badgen.net).
+- Icons are provided by the amazing [Simple Icons](https://simpleicons.org) project.
+- The font used for badge rendering is [DejaVu Sans](https://dejavu-fonts.github.io), an open-source font family designed for high-quality text rendering.
 
 ## License
 

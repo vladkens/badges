@@ -23,7 +23,8 @@ fn is_no_file(filepath: &str) -> Option<&str> {
 // MARK: Font Width
 
 fn load_font() -> Font<'static> {
-  let font_path = "/System/Library/Fonts/Supplemental/Verdana.ttf";
+  // let font_path = "/System/Library/Fonts/Supplemental/Verdana.ttf";
+  let font_path = "vendor/DejaVuSans.ttf";
   let font_data = std::fs::read(font_path).expect("Failed to read font file");
   Font::try_from_vec(font_data).expect("Failed to parse font data")
 }
@@ -32,7 +33,7 @@ fn load_font() -> Font<'static> {
 // https://gitlab.redox-os.org/redox-os/rusttype/-/blob/d2b6874c/dev/examples/ascii.rs
 fn calc_width(font: &Font, text: &str, size: f32) -> f32 {
   font
-    .layout(text, Scale { x: size * 1.25, y: size }, point(0.0, 0.0))
+    .layout(text, Scale { x: size * 1.15, y: size }, point(0.0, 0.0))
     .map(|g| g.position().x + g.unpositioned().h_metrics().advance_width)
     .last()
     .unwrap_or(0.0)
