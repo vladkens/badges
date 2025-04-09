@@ -1,6 +1,7 @@
 use axum::extract::{Path, Query};
 use badgelib::Badge;
 use cached::proc_macro::cached;
+use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::server::{BadgeRep, Res};
@@ -20,7 +21,16 @@ async fn get_data(name: String) -> Res<Data> {
   Ok(Data { members })
 }
 
-pub async fn handler(Path(name): Path<String>, Query(badge): Query<Badge>) -> BadgeRep {
+#[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display)]
+pub(crate) enum Kind {
+  #[serde(rename = "online")]
+  Online,
+}
+
+pub async fn handler(
+  Path((_kind, name)): Path<(Kind, String)>,
+  Query(badge): Query<Badge>,
+) -> BadgeRep {
   let rs = get_data(name).await?;
   let value = format!("{} online", rs.members);
   Ok(badge.label("discord").value(&value))

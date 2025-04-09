@@ -7,9 +7,8 @@
 html { scroll-behavior: smooth; }
 .absolute { position: absolute; }
 .relative { position: relative; }
-.flex { display: flex; }
-.flex-row { flex-direction: row; }
-.flex-col { flex-direction: column; }
+.flex-row { display: flex; flex-direction: row; }
+.flex-col { display: flex; flex-direction: column; }
 .flex-wrap { flex-wrap: wrap; }
 .items-center { align-items: center; }
 .w-1\/2 { width: 50%; }
@@ -18,6 +17,7 @@ html { scroll-behavior: smooth; }
 .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
 .pr-2 { padding-right: 0.5rem; }
 .text-center { text-align: center; }
+.text-right { text-align: right; }
 .no-underline { text-decoration: none; }
 .heading { position: relative; }
 .heading a { position: absolute; transform: translateX(-100%); left: 0; padding-right: 0.5rem; opacity: 0; text-decoration: none; }

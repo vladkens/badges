@@ -45,9 +45,8 @@ fn render_tbox<T: Into<String>>(name: &str, items: Vec<(T, T)>) -> maud::Markup 
         tbody {
           @for (path, desc) in items {
             tr {
-              td class="w-1/4 py-1" { (desc) }
               td class="w-2/4 py-1" { code { (path) } }
-              td class="w-1/4 py-1" { img class="h20" src=(path) alt=(desc) {} }
+              td class="w-1/4 py-1 text-right" { img class="h20" src=(path) alt=(desc) {} }
             }
           }
         }
@@ -72,6 +71,16 @@ fn render_enum<T: IntoEnumIterator + std::fmt::Display + serde::Serialize>(
 }
 
 // MARK: Layouts
+
+fn icon_external(size: u16) -> Markup {
+  // https://heroicons.com/mini "external"
+  html! {
+    svg xmlns="http://www.w3.org/2000/svg" widht=(size) height=(size) viewBox="0 0 20 20" style="margin-left: 0.25rem" {
+      path fill-rule="evenodd" d="M4.25 5.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 0 0 .75-.75v-4a.75.75 0 0 1 1.5 0v4A2.25 2.25 0 0 1 12.75 17h-8.5A2.25 2.25 0 0 1 2 14.75v-8.5A2.25 2.25 0 0 1 4.25 4h5a.75.75 0 0 1 0 1.5h-5Z" {}
+      path fill-rule="evenodd" d="M6.194 12.753a.75.75 0 0 0 1.06.053L16.5 4.44v2.81a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0 0 1.5h2.553l-9.056 8.194a.75.75 0 0 0-.053 1.06Z" {}
+    }
+  }
+}
 
 fn layout(title: Option<&str>, node: Markup) -> Markup {
   let title = match title {
@@ -135,18 +144,16 @@ fn layout(title: Option<&str>, node: Markup) -> Markup {
       }
 
       ul {
-        // li {
-        //   a href="/debug" class="contrast" { "Debug" }
-        // }
+        li {
+          a href="/privacy" class="contrast" { "Privacy Policy" }
+        }
+
+
 
         li {
-          a target="_blank" href="https://github.com/vladkens/badges" {
-            button class="outline secondary" {
-              img src="https://cdn.simpleicons.org/github/black/white"
-                style="width: 24px; height: 24px; margin-top: -5px; margin-right: 8px;" {}
-
-              "View on GitHub"
-            }
+          a href="https://github.com/vladkens/badges" class="contrast flex-row items-center" target="_blank" {
+            "View on GitHub"
+            (icon_external(20))
           }
         }
       }
@@ -157,7 +164,7 @@ fn layout(title: Option<&str>, node: Markup) -> Markup {
     footer class="text-center" {
       hr {}
 
-      div style="display: flex; justify-content: center; align-items: center; gap: 16px; padding-bottom: 10px" {
+      div class="flex-row items-center" style="justify-content: center; gap: 16px; padding-bottom: 10px" {
         a target="_blank" href="https://startupfa.me/s/badgesws?utm_source=badges.ws" {
           img src="https://startupfa.me/badges/featured-badge.webp" alt="Featured on Startup Fame" width="171" height="54" {}
         }
@@ -165,11 +172,6 @@ fn layout(title: Option<&str>, node: Markup) -> Markup {
         a target="_blank" href="https://twelve.tools?utm_source=badges.ws" {
           img src="https://twelve.tools/badge0-light.svg" alt="Featured on Twelve Tools" width="200" height="54" {}
         }
-      }
-
-      div style="display: flex; justify-content: center; align-items: center; gap: 16px; padding-bottom: 10px" {
-        a target="_blank" href="https://github.com/vladkens/badges" { "GitHub" }
-        a href="/privacy" { "Privacy Policy" }
       }
 
       small {
@@ -1041,7 +1043,7 @@ pub async fn debug() -> AnyRep<impl IntoResponse> {
 
   let icls = "height: 62px;";
   let node = html!({
-    div class="flex flex-col gap-2 items-center" {
+    div class="flex-col gap-2 items-center" {
       table {
         @for item in items {
           tr {
@@ -1124,7 +1126,7 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
         "Colors can be specified using predefined names or hex values via the "
         code { "?color={COLOR}" } " parameter"
     }
-      div class="flex flex-row gap-2 flex-wrap" {
+      div class="flex-row gap-2 flex-wrap" {
         @for (label, color) in colors {
           img class="h20" src=(format!("/badge/?value={color}&color={color}&label={label}")) alt=(color) {}
         }
@@ -1142,7 +1144,7 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
         a href="https://simpleicons.org/" class="contrast" target="_blank" { "Simple Icons" }
         " project."
       }
-      div class="flex flex-row gap-2 flex-wrap" {
+      div class="flex-row gap-2 flex-wrap" {
         @for icon in icons {
           img class="h20" src=(format!("/badge/?icon={icon}&value={icon}")) alt=(icon) {}
         }
@@ -1167,8 +1169,12 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
     (sec_options)
 
     section {
-      (heading(3, "Integrations"))
+      (heading(3, "Badges"))
       (render_tbox("Static", static_examples))
+    }
+
+    section {
+      (heading(3, "Languages & Packages"))
       (render_enum::<apis::npm::Kind>("NPM", "/npm/{}/apigen-ts"))
       (render_enum::<apis::pypi::Kind>("PyPI", "/pypi/{}/twscrape"))
       (render_enum::<apis::crates::Kind>("Crates.io", "/crates/{}/tokio"))
@@ -1183,18 +1189,28 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
       (render_enum::<apis::cocoapods::Kind>("CocoaPods", "/cocoapods/{}/SwiftyJSON"))
       (render_enum::<apis::puppetforge::Kind>("Puppet Forge", "/puppetforge/{}/puppetlabs/puppetdb"))
       (render_enum::<apis::cpan::Kind>("CPAN", "/cpan/{}/PerlPowerTools"))
+    }
+
+    section {
+      (heading(3, "Marketplaces"))
       (render_enum::<apis::homebrew::Kind>("Homebrew", "/homebrew/{}/macmon"))
       (render_enum::<apis::homebrew::Kind>("Homebrew Cask", "/homebrew/{}/cask/firefox"))
       (render_enum::<apis::vscode::Kind>("VS Code", "/vscode/{}/esbenp.prettier-vscode"))
       (render_enum::<apis::amo::Kind>("Mozilla Add-ons", "/amo/{}/privacy-badger17"))
       (render_enum::<apis::cws::Kind>("Chrome Web Store", "/cws/{}/epcnnfbjfcgphgdmggkamkmgojdagdnn"))
       (render_enum::<apis::jetbrains::Kind>("JetBrains Plugin", "/jetbrains/{}/22282"))
+    }
+
+    section {
+      (heading(3, "Services & CI/CD"))
       (render_enum::<apis::github::Kind>("GitHub", "/github/{}/vladkens/macmon"))
       (render_enum::<apis::docker::Kind>("Docker", "/docker/{}/grafana/grafana"))
+      (render_enum::<apis::readthedocs::Kind>("Read the Docs", "/readthedocs/{}/pip"))
     }
 
     section {
       (heading(3, "Community"))
+      (render_enum::<apis::discord::Kind>("Discord", "/discord/{}/793890238267260958"))
       (render_enum::<apis::youtube::KindChannel>("YouTube Channel", "/youtube/channel/{}/UC8ENHE5xdFSwx71u3fDH5Xw"))
       (render_enum::<apis::youtube::KindVideo>("YouTube Video", "/youtube/{}/dQw4w9WgXcQ"))
     }

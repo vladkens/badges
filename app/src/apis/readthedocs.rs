@@ -1,6 +1,7 @@
 use axum::extract::{Path, Query};
 use badgelib::Badge;
 use cached::proc_macro::cached;
+use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::server::{BadgeRep, Res};
@@ -14,7 +15,16 @@ async fn get_docs(name: String) -> Res<bool> {
   Ok(dat.contains("passing"))
 }
 
-pub async fn handler(Path(name): Path<String>, Query(badge): Query<Badge>) -> BadgeRep {
+#[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display)]
+pub(crate) enum Kind {
+  #[serde(rename = "status")]
+  Status,
+}
+
+pub async fn handler(
+  Path((_kind, name)): Path<(Kind, String)>,
+  Query(badge): Query<Badge>,
+) -> BadgeRep {
   let status = get_docs(name).await?;
   Ok(badge.for_ci_status("docs", status))
 }

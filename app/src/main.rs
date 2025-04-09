@@ -15,7 +15,7 @@ macro_rules! redirect {
     let to = $to.to_string();
     axum::routing::get(move |Path(rest): Path<String>, uri: Uri| async move {
       let qs = uri.query().unwrap_or_default();
-      let url = to.replace("{*rest}", &rest);
+      let url = to.replace("{*rest}", &rest).replace("{rest}", &rest);
       let url = if qs.is_empty() { url } else { format!("{}?{}", url, qs) };
       axum::response::Redirect::permanent(&url)
     })
@@ -70,15 +70,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .route("/codecov/c/{service}/{user}/{repo}/{branch}", get(apis::codecov::handler))
     .route("/docker/{kind}/{user}/{repo}", get(apis::docker::handler))
     .route("/docker/{kind}/{user}/{repo}/{tag}", get(apis::docker::handler))
-    .route("/readthedocs/{name}", get(apis::readthedocs::handler))
-    .route("/discord/{name}", get(apis::discord::handler))
+    .route("/readthedocs/{kind}/{name}", get(apis::readthedocs::handler))
+    .route("/discord/{kind}/{name}", get(apis::discord::handler))
     .route("/youtube/channel/{kind}/{cid}", get(apis::youtube::channel_handler))
     .route("/youtube/{kind}/{vid}", get(apis::youtube::video_handler))
     .route("/badge", get(apis::fixed::handler1))
     .route("/badge/{config}", get(apis::fixed::handler2))
     .route("/badge/{label}/{value}/{color}", get(apis::fixed::handler3));
 
+  // `{rest}` to capture single token, `{*rest}` to capture all tokens
   let compatibility = Router::new()
+    .route("/readthedocs/{rest}", redirect!("/readthedocs/status/{rest}"))
+    .route("/discord/{rest}", redirect!("/discord/members/{rest}"))
     .route("/pypi/pyversions/{*rest}", redirect!("/pypi/python/{*rest}"))
     .route("/github/actions/workflow/status/{*rest}", redirect!("/github/workflow/{*rest}"))
     .route("/crates/d/{*rest}", redirect!("/crates/dt/{*rest}"))
