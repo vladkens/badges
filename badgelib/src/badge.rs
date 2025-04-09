@@ -202,7 +202,7 @@ impl Badge {
       0 => ("today".into(), Color::Green),
       1 => ("yesterday".into(), Color::Green),
       2..=7 => (format!("{} days ago", days), Color::Green),
-      8..=30 => (format!("{} days ago", days), Color::YellowGreen),
+      8..=30 => (format!("{} days ago", days), Color::Lime),
       31..=180 => (format!("{} months ago", days / 30), Color::Yellow),
       181..=365 => (format!("{} months ago", days / 30), Color::Orange),
       _ => (format!("{} years ago", days / 365), Color::Red),

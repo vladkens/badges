@@ -14,7 +14,7 @@ pub enum Color {
   #[default]
   Blue,
   Green,
-  YellowGreen,
+  Lime,
   Yellow,
   Orange,
   Red,
@@ -27,17 +27,18 @@ pub enum Color {
 
 impl Color {
   pub fn to_hex(&self) -> String {
+    // https://tailwindcss.com/docs/colors
     match self {
-      Color::Blue => "1e88e5".into(),
-      Color::Green => "2ecc71".into(),
-      Color::YellowGreen => "a3e048".into(),
-      Color::Yellow => "f9a825".into(),
-      Color::Orange => "ff7043".into(),
-      Color::Red => "e53935".into(),
-      Color::Gray => "607d8b".into(),
-      Color::Black => "1c1c1e".into(),
-      Color::White => "f5f5f5".into(),
-      Color::Cyan => "00acc1".into(),
+      Color::Blue => "3b82f6".into(),   // blue-500
+      Color::Green => "22c55e".into(),  // green-500
+      Color::Lime => "84cc16".into(),   // lime-500
+      Color::Yellow => "eab308".into(), // yellow-500
+      Color::Orange => "f97316".into(), // orange-500
+      Color::Red => "ef4444".into(),    // red-500
+      Color::Gray => "71717a".into(),   // zinc-500
+      Color::Black => "18181b".into(),  // zinc-900
+      Color::White => "f4f4f5".into(),  // zinc-100
+      Color::Cyan => "06b6d4".into(),   // cyan-500
       Color::Hex(hex) => {
         if hex.len() == 3 {
           hex.chars().map(|c| c.to_string().repeat(2)).collect()
@@ -61,11 +62,11 @@ impl<'a> TryFrom<&'a str> for Color {
     match value.to_lowercase().trim().replace("#", "").as_ref() {
       "blue" => Ok(Color::Blue),
       "green" => Ok(Color::Green),
-      "yellowgreen" => Ok(Color::YellowGreen),
+      "lime" | "yellowgreen" => Ok(Color::Lime),
       "yellow" => Ok(Color::Yellow),
       "orange" => Ok(Color::Orange),
       "red" => Ok(Color::Red),
-      "grey" => Ok(Color::Gray),
+      "gray" | "grey" => Ok(Color::Gray),
       "black" => Ok(Color::Black),
       "white" => Ok(Color::White),
       "cyan" => Ok(Color::Cyan),

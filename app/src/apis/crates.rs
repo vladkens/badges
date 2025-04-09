@@ -67,7 +67,7 @@ async fn get_deps_status(name: String) -> Res<(String, Color)> {
   match msg {
     "none" => Ok(("none".to_string(), Color::Green)),
     "up to date" => Ok(("up to date".to_string(), Color::Green)),
-    "maybe insecure" => Ok(("maybe insecure".to_string(), Color::YellowGreen)),
+    "maybe insecure" => Ok(("maybe insecure".to_string(), Color::Lime)),
     "insecure" => Ok(("maybe insecure".to_string(), Color::Red)),
     x if x.contains("outdated") => Ok((x.to_string(), Color::Yellow)),
     _ => Ok(("unknown".to_string(), Color::Gray)),

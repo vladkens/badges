@@ -102,7 +102,7 @@ pub(crate) fn rating_color<T: Into<f64>>(value: T, max_value: T) -> Color {
 
   match value {
     x if x >= max_value * 0.80 => Color::Green,
-    x if x >= max_value * 0.60 => Color::YellowGreen,
+    x if x >= max_value * 0.60 => Color::Lime,
     x if x >= max_value * 0.40 => Color::Yellow,
     x if x >= max_value * 0.20 => Color::Orange,
     _ => Color::Red,

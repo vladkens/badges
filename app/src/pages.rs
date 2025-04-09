@@ -1113,6 +1113,7 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
     ("color", "orange"),
     ("color", "red"),
     ("color", "blue"),
+    ("color", "cyan"),
     ("color", "grey"),
     ("color", "black"),
     ("color", "white"),
