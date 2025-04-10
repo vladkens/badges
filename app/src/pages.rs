@@ -39,7 +39,7 @@ fn render_tbox<T: Into<String>>(name: &str, items: Vec<(T, T)>) -> maud::Markup 
 
   html!({
     section {
-      (heading(4, name))
+      @if !name.is_empty() { (heading(4, name)) }
 
       table class="striped" {
         tbody {
@@ -1098,12 +1098,6 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
     ("radius", "Border radius in pixels (0-12)"),
   ];
 
-  let static_examples = vec![
-    ("/badge/label-message-ff0000", "Fixed badge"),
-    ("/badge/label--message-f00", "Fixed badge with dash"),
-    ("/badge/label__message-red", "Fixed badge with underscore"),
-  ];
-
   let colors = [
     ("color", "green"),
     ("color", "yellowgreen"),
@@ -1168,8 +1162,19 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
     (sec_options)
 
     section {
-      (heading(3, "Dynamic badges"))
-      (render_tbox("Static", static_examples))
+      (heading(3, "Custom Badges"))
+
+      (render_tbox("Static", vec![
+        ("/badge/label-message-ff0000", "Fixed badge"),
+        ("/badge/label--message-f00", "Fixed badge with dash"),
+        ("/badge/label__message-red", "Fixed badge with underscore"),
+      ]))
+
+      (render_tbox("Maintenance", vec![
+        ("/maintenance/yes/2025", ""),
+        ("/maintenance/no/2025", ""),
+        ("/maintenance/yes/2024", ""),
+      ]))
     }
 
     section {

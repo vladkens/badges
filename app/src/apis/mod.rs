@@ -16,6 +16,7 @@ pub(crate) mod hackage;
 pub(crate) mod hexpm;
 pub(crate) mod homebrew;
 pub(crate) mod jetbrains;
+pub(crate) mod maintenance;
 pub(crate) mod npm;
 pub(crate) mod nuget;
 pub(crate) mod packagephobia;

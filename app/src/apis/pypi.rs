@@ -17,7 +17,7 @@ struct PyPiData {
   implementation: String,
 }
 
-fn parse_version<'a>(v: &'a String) -> Vec<u32> {
+fn parse_version(v: &str) -> Vec<u32> {
   v.split('.').map(|part| part.parse::<u32>().unwrap_or(0)).collect()
 }
 
@@ -43,7 +43,7 @@ async fn get_data(name: String) -> Res<PyPiData> {
     .filter(|x| !x.contains(" :: ")) // Drop with label, e.g.: "Python :: 3.X :: Label"
     .collect::<Vec<String>>();
 
-  pythons.sort_by_key(parse_version);
+  pythons.sort_by_key(|x| parse_version(x));
 
   let status = classifiers
     .iter()

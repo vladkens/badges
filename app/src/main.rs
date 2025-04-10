@@ -74,6 +74,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .route("/discord/{kind}/{name}", get(apis::discord::handler))
     .route("/youtube/channel/{kind}/{cid}", get(apis::youtube::channel_handler))
     .route("/youtube/{kind}/{vid}", get(apis::youtube::video_handler))
+    .route("/maintenance/{kind}/{year}", get(apis::maintenance::handler))
     .route("/badge", get(apis::fixed::handler1))
     .route("/badge/{config}", get(apis::fixed::handler2))
     .route("/badge/{label}/{value}/{color}", get(apis::fixed::handler3));

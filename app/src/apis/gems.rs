@@ -35,7 +35,7 @@ async fn get_data(name: String) -> Res<GemData> {
   Ok(GemData { version, license, dlt, ruby_ver })
 }
 
-fn norm_min_ver(v: &String) -> String {
+fn norm_min_ver(v: &str) -> String {
   v.replace(">=", "≥").replace("<=", "≤")
 }
 
