@@ -120,7 +120,7 @@ fn rewrite_request_uri<B>(mut req: Request<B>) -> Request<B> {
 
   let has_ext = path.ends_with(".svg") || path.ends_with(".json");
   if !path.starts_with("/assets/") && has_ext {
-    let ext = path.split('.').last().unwrap();
+    let ext = path.split('.').next_back().unwrap();
     path = path.trim_end_matches(&format!(".{}", ext));
     qs = if qs.is_empty() { format!("format={}", ext) } else { format!("{}&format={}", qs, ext) };
   }

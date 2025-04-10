@@ -23,7 +23,7 @@ async fn get_data(name: String) -> Res<Data> {
 
   let version = dat["current_version"]["version"].as_str().unwrap_or("unknown").to_string();
   let license = dat["current_version"]["license"]["url"].as_str().unwrap_or("unknown").to_string();
-  let license = license.split('/').last().unwrap_or(&license).to_string();
+  let license = license.split('/').next_back().unwrap_or(&license).to_string();
   let license = license.strip_suffix(".html").unwrap_or(&license).to_string();
   let dlw = dat["weekly_downloads"].as_u64().unwrap_or(0);
   let users = dat["average_daily_users"].as_u64().unwrap_or(0);

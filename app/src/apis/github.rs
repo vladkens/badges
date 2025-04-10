@@ -15,6 +15,7 @@ struct Base {
   forks: u64,
   watchers: u64,
   size: u64,
+  lang: String,
 }
 
 #[cached(time = 60, result = true)]
@@ -28,8 +29,9 @@ async fn get_data(name: String) -> Res<Base> {
   let forks = dat["forks_count"].as_u64().unwrap_or(0);
   let watchers = dat["subscribers_count"].as_u64().unwrap_or(0);
   let size = dat["size"].as_u64().unwrap_or(0) * 1024; // in bytes
+  let lang = dat["language"].as_str().unwrap_or("unknown").to_string().to_lowercase();
 
-  Ok(Base { license, stars, forks, watchers, size })
+  Ok(Base { license, stars, forks, watchers, size, lang })
 }
 
 #[derive(Debug, Clone)]
@@ -109,9 +111,9 @@ async fn get_contributors(name: String) -> Res<u64> {
     .find(|x| x.contains("rel=\"last\""))
     .and_then(|x| x.split(';').next())
     .and_then(|x| x.trim().strip_prefix('<').and_then(|x| x.strip_suffix('>')))
-    .and_then(|x| x.split('?').last())
+    .and_then(|x| x.split('?').next_back())
     .and_then(|x| x.split('&').find(|x| x.starts_with("page=")))
-    .and_then(|x| x.split('=').last())
+    .and_then(|x| x.split('=').next_back())
     .and_then(|x| x.parse::<u64>().ok())
     .unwrap_or(1);
 
@@ -136,6 +138,8 @@ pub(crate) enum Kind {
   LastCommit,
   #[serde(rename = "repo-size")]
   RepoSize,
+  #[serde(rename = "lang")]
+  Lang,
   #[serde(rename = "lang-top")]
   LangTop,
   #[serde(rename = "lang-count")]
@@ -163,7 +167,7 @@ pub async fn handler(
     Kind::Release => Ok(badge.for_version("release", &get_release(name).await?.version)),
     Kind::AssetsDl => Ok(badge.for_downloads(Period::Total, get_release(name).await?.dlt)),
     Kind::Contributors => Ok(badge.for_count("contributors", get_contributors(name).await?)),
-    Kind::License | Kind::Stars | Kind::Forks | Kind::Watchers | Kind::RepoSize => {
+    Kind::License | Kind::Stars | Kind::Forks | Kind::Watchers | Kind::RepoSize | Kind::Lang => {
       let rs = get_data(name).await?;
       match kind {
         Kind::License => Ok(badge.for_license(&rs.license)),
@@ -171,6 +175,7 @@ pub async fn handler(
         Kind::Forks => Ok(badge.for_count("forks", rs.forks)),
         Kind::Watchers => Ok(badge.for_count("watchers", rs.watchers)),
         Kind::RepoSize => Ok(badge.for_size("repo size", rs.size)),
+        Kind::Lang => Ok(badge.label("lang").value(&rs.lang)),
         _ => unreachable!(),
       }
     }

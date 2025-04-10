@@ -85,7 +85,7 @@ fn generate_icons(outfile: &str) {
   let icons: Vec<(String, String)> = get_files_of_kind("vendor/simple-icons/icons", "svg")
     .into_par_iter()
     .map(|x| {
-      let name = x.split('/').last().unwrap().split('.').next().unwrap().to_string();
+      let name = x.split('/').next_back().unwrap().split('.').next().unwrap().to_string();
       let data = fs::read_to_string(x).unwrap();
       let data = data.split("<path d=\"").last().unwrap().split("\"").next().unwrap();
       (name, data.to_string())
