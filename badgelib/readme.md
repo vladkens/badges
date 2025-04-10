@@ -19,17 +19,16 @@ A Rust library for generating customizable SVG badges, similar to shields.io.
 
 ## Installation
 
-Add this to your `Cargo.toml`:
+Add **badgelib** to your project using the following `cargo` command:
 
-```toml
-[dependencies]
-badgelib = "0.1.0"
+```sh
+cargo add badgelib
 ```
 
-To enable Axum integration, add the `axum` feature:
+To enable Axum integration, use:
 
-```toml 
-badgelib = { version = "0.1.0", features = ["axum"] }
+```sh
+cargo add badgelib --features axum
 ```
 
 ## Usage

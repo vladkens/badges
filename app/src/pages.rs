@@ -98,21 +98,21 @@ fn layout(title: Option<&str>, node: Markup) -> Markup {
     title { (title) }
     meta name="title" content=(title) {}
     meta name="description" content=(descr) {}
+    link rel="icon" type="image/svg+xml" href="/assets/logo.svg" {}
+    // link rel="icon" type="image/png" href="/assets/favicon.png" {}
+    // link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" {}
 
     // Open Graph / X Meta Tags
     meta property="og:type" content="website" {}
     meta property="og:url" content="https://badges.ws/" {}
     meta property="og:title" content=(title) {}
     meta property="og:description" content=(descr) {}
-    meta property="og:image" content="/assets/social-preview.png" {}
+    // meta property="og:image" content="/assets/social-preview.png" {}
     meta property="twitter:card" content="summary_large_image" {}
     meta property="twitter:url" content="https://badges.ws/" {}
     meta property="twitter:title" content=(title) {}
     meta property="twitter:description" content=(descr) {}
-    meta property="twitter:image" content="/assets/social-preview.png" {}
-    link rel="icon" type="image/svg+xml" href="/assets/logo.svg" {}
-    // link rel="icon" type="image/png" href="/assets/favicon.png" {}
-    // link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" {}
+    // meta property="twitter:image" content="/assets/social-preview.png" {}
 
     // Additional Meta Tags
     meta name="theme-color" content="#ffffff" {}
@@ -147,8 +147,6 @@ fn layout(title: Option<&str>, node: Markup) -> Markup {
         li {
           a href="/privacy" class="contrast" { "Privacy Policy" }
         }
-
-
 
         li {
           a href="https://github.com/vladkens/badges" class="contrast flex-row items-center" target="_blank" {
@@ -1170,12 +1168,13 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
     (sec_options)
 
     section {
-      (heading(3, "Badges"))
+      (heading(3, "Dynamic badges"))
       (render_tbox("Static", static_examples))
     }
 
     section {
-      (heading(3, "Languages & Packages"))
+      (heading(3, "Integrations"))
+      // Languages & Packages
       (render_enum::<apis::npm::Kind>("NPM", "/npm/{}/apigen-ts"))
       (render_enum::<apis::pypi::Kind>("PyPI", "/pypi/{}/twscrape"))
       (render_enum::<apis::crates::Kind>("Crates.io", "/crates/{}/tokio"))
@@ -1190,27 +1189,18 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
       (render_enum::<apis::cocoapods::Kind>("CocoaPods", "/cocoapods/{}/SwiftyJSON"))
       (render_enum::<apis::puppetforge::Kind>("Puppet Forge", "/puppetforge/{}/puppetlabs/puppetdb"))
       (render_enum::<apis::cpan::Kind>("CPAN", "/cpan/{}/PerlPowerTools"))
-    }
-
-    section {
-      (heading(3, "Marketplaces"))
+      // Marketplaces
       (render_enum::<apis::homebrew::Kind>("Homebrew", "/homebrew/{}/macmon"))
       (render_enum::<apis::homebrew::Kind>("Homebrew Cask", "/homebrew/{}/cask/firefox"))
       (render_enum::<apis::vscode::Kind>("VS Code", "/vscode/{}/esbenp.prettier-vscode"))
       (render_enum::<apis::amo::Kind>("Mozilla Add-ons", "/amo/{}/privacy-badger17"))
       (render_enum::<apis::cws::Kind>("Chrome Web Store", "/cws/{}/epcnnfbjfcgphgdmggkamkmgojdagdnn"))
       (render_enum::<apis::jetbrains::Kind>("JetBrains Plugin", "/jetbrains/{}/22282"))
-    }
-
-    section {
-      (heading(3, "Services & CI/CD"))
+      // Services & CI/CD
       (render_enum::<apis::github::Kind>("GitHub", "/github/{}/vladkens/macmon"))
       (render_enum::<apis::docker::Kind>("Docker", "/docker/{}/grafana/grafana"))
       (render_enum::<apis::readthedocs::Kind>("Read the Docs", "/readthedocs/{}/pip"))
-    }
-
-    section {
-      (heading(3, "Community"))
+      // Community
       (render_enum::<apis::discord::Kind>("Discord", "/discord/{}/793890238267260958"))
       (render_enum::<apis::youtube::KindChannel>("YouTube Channel", "/youtube/channel/{}/UC8ENHE5xdFSwx71u3fDH5Xw"))
       (render_enum::<apis::youtube::KindVideo>("YouTube Video", "/youtube/{}/dQw4w9WgXcQ"))

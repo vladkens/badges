@@ -2,6 +2,12 @@
 name = "badgelib"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+description = "A library for generating badges in Rust"
+homepage = "https://badges.ws"
+repository = "https://github.com/vladkens/badges/"
+keywords = ["badge", "badges", "shields"]
+categories = ["development-tools"]
 
 [features]
 default = []

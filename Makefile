@@ -34,6 +34,9 @@ docker-run: docker-build
 	docker rm --force $(tag) || true
 	docker run -p 8080:8080 --name $(tag) $(tag)
 
+publish:
+	cargo publish --manifest-path badgelib/Cargo.toml
+
 bench:
 	@# wrk -t4 -c400 -d30s http://localhost:8080/health
 	wrk -t4 -c400 -d30s 'http://localhost:8080/badge/?icon=github&label=GitHub&value=badges'

@@ -84,6 +84,12 @@ docker run -d -p 8080:80 ghcr.io/vladkens/badges:latest
 
 *(⏳ = Coming Soon)*
 
+## Use as a Rust Crate
+
+The core library powering Badges.ws, **badgelib**, can also be used as a standalone Rust crate for generating customizable SVG badges programmatically.
+
+For more details and examples, check out the [badgelib README](badgelib/readme.md).
+
 ## Contribute
 
 **Missing an integration?** Request or contribute — let’s build the ultimate badge toolkit together!

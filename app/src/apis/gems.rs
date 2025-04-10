@@ -35,6 +35,10 @@ async fn get_data(name: String) -> Res<GemData> {
   Ok(GemData { version, license, dlt, ruby_ver })
 }
 
+fn norm_min_ver(v: &String) -> String {
+  v.replace(">=", "≥").replace("<=", "≤")
+}
+
 #[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display)]
 pub(crate) enum Kind {
   #[serde(rename = "v", alias = "version")]
@@ -56,6 +60,6 @@ pub async fn handler(
     Kind::Version => Ok(badge.for_version("gem", &rs.version)),
     Kind::License => Ok(badge.for_license(&rs.license)),
     Kind::DlTotal => Ok(badge.for_downloads(Period::Total, rs.dlt)),
-    Kind::Ruby => Ok(badge.label("ruby").value(&rs.ruby_ver)),
+    Kind::Ruby => Ok(badge.label("ruby").value(&norm_min_ver(&rs.ruby_ver))),
   }
 }
