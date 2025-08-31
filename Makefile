@@ -3,11 +3,9 @@ tag=badges
 dev:
 	watchexec -rc -e rs -- cargo run
 
-fix:
-	cargo fix --allow-dirty --allow-staged
+fmt:
 	cargo +nightly fmt
-
-check: lint test
+	cargo fix --allow-dirty --allow-staged
 
 lint:
 	cargo +nightly fmt --check
@@ -19,7 +17,7 @@ test:
 
 update:
 	git submodule update --init --recursive
-	git submodule foreach 'git fetch --tags && git checkout $(git describe --tags)'
+	git submodule foreach 'git fetch --tags && git checkout $$(git describe --tags $$(git rev-list --tags --max-count=1))'
 	rm -rf badgelib/src/_icons.rs badgelib/src/_width.rs
 	cargo upgrade -i
 

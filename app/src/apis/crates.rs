@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Color, Period};
 use cached::proc_macro::cached;

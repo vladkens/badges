@@ -1,6 +1,6 @@
 [package]
 name = "badgelib"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "MIT"
 description = "A library for generating badges in Rust"
@@ -16,12 +16,12 @@ axum = ["dep:axum"]
 [dependencies]
 axum = { version = ">=0.8.0", optional = true }
 base64 = "0.22.1"
-chrono = { version = "0.4.40", features = ["serde"] }
+chrono = { version = "0.4.41", features = ["serde"] }
 maud = { version = "0.27.0" }
-phf = { version = "0.11.3", features = ["macros"] }
+phf = { version = "0.13.1", features = ["macros"] }
 serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.140"
+serde_json = "1.0.143"
 
 [build-dependencies]
-rayon = "1.10.0"
+rayon = "1.11.0"
 rusttype = "0.9.3"
