@@ -1,9 +1,7 @@
-use std::time::Duration;
-
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Period};
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -17,7 +15,7 @@ struct GemData {
   ruby_ver: String,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_data(name: String) -> Res<GemData> {
   // let url = format!("https://rubygems.org/api/v1/gems/{name}.json");
   let url = format!("https://rubygems.org/api/v1/versions/{name}.json");

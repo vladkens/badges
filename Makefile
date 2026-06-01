@@ -1,19 +1,26 @@
+.PHONY: prepare check test watch build update deploy docker-build docker-run publish bench
+
 tag=badges
 
-dev:
-	watchexec -rc -e rs -- cargo run
+prepare:
+	cargo fmt
+	cargo clippy --fix --workspace --all-targets --all-features --locked --allow-dirty --allow-staged -- -D warnings
+	cargo check --workspace --release --locked
 
-fmt:
-	cargo +nightly fmt
-	cargo fix --allow-dirty --allow-staged
-
-lint:
-	cargo +nightly fmt --check
-	cargo clippy --workspace --all-targets --all-features -- -D warnings
+check:
+	cargo fmt --check
+	cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 	cargo check --workspace --release --locked
 
 test:
 	cargo test --workspace --all-features --locked
+
+watch:
+	watchexec -rc -e rs -- cargo run
+
+build:
+	cargo build --workspace --release --locked
+	ls -lh target/release/badges
 
 update:
 	git submodule update --init --recursive

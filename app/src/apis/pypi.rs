@@ -1,9 +1,7 @@
-use std::time::Duration;
-
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Color, Period};
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -23,7 +21,7 @@ fn parse_version(v: &str) -> Vec<u32> {
   v.split('.').map(|part| part.parse::<u32>().unwrap_or(0)).collect()
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_data(name: String) -> Res<PyPiData> {
   // https://pypi.org/pypi?%3Aaction=list_classifiers
   let url = format!("https://pypi.org/pypi/{name}/json");
@@ -76,7 +74,7 @@ async fn get_data(name: String) -> Res<PyPiData> {
   Ok(PyPiData { version, license, pythons, wheel, status, implementation })
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_dl_granular(name: String) -> Res<(u64, u64)> {
   // doc: https://pypistats.org/api/
   let url = format!("https://pypistats.org/api/packages/{}/recent", name);
@@ -88,7 +86,7 @@ async fn get_dl_granular(name: String) -> Res<(u64, u64)> {
   Ok((dlw, dlm))
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_dl_total(name: String) -> Res<u64> {
   let url = format!("https://pypistats.org/api/packages/{}/overall?mirrors=true", name);
   let rep = get_client().get(&url).send().await?.error_for_status()?;

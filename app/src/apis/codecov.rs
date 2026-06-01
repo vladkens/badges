@@ -1,8 +1,6 @@
-use std::time::Duration;
-
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Color};
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -18,7 +16,7 @@ pub(crate) enum Service {
   Bitbucket,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_coverage(service: Service, name: String) -> Res<u64> {
   let url = format!("https://codecov.io/{service}/{name}/graph/badge.txt");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

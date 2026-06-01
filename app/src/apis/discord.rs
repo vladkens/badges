@@ -1,8 +1,6 @@
-use std::time::Duration;
-
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Color};
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -14,7 +12,7 @@ pub enum Data {
   Message(String),
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_data(name: String) -> Res<Data> {
   let url = format!("https://discord.com/api/v6/guilds/{name}/widget.json");
   let rep = get_client().get(&url).send().await?;

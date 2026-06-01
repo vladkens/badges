@@ -1,14 +1,12 @@
-use std::time::Duration;
-
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Period};
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::server::{BadgeRep, Res};
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_version(name: String) -> Res<String> {
   let url = format!("https://plugins.jetbrains.com/api/plugins/{name}/updates");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -16,7 +14,7 @@ async fn get_version(name: String) -> Res<String> {
   Ok(dat[0]["version"].as_str().unwrap_or("unknown").to_string())
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_dlt(name: String) -> Res<u64> {
   let url = format!("https://plugins.jetbrains.com/api/plugins/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -24,7 +22,7 @@ async fn get_dlt(name: String) -> Res<u64> {
   Ok(dat["downloads"].as_u64().unwrap_or(0))
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_score(name: String) -> Res<f64> {
   let url = format!("https://plugins.jetbrains.com/api/plugins/{name}/rating");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

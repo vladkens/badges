@@ -1,14 +1,12 @@
-use std::time::Duration;
-
 use axum::extract::{Path, Query};
 use badgelib::Badge;
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::server::{BadgeRep, Res};
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_docs(name: String) -> Res<bool> {
   // https://readthedocs.org/api/v3/projects/{}/builds/
   let url = format!("https://readthedocs.org/projects/{}/badge/", name);

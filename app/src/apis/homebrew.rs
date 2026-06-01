@@ -1,8 +1,6 @@
-use std::time::Duration;
-
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Period};
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -15,7 +13,7 @@ struct Data {
   dly: u64,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_data(chan: String, name: String) -> Res<Data> {
   let url = format!("https://formulae.brew.sh/api/{chan}/{name}.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

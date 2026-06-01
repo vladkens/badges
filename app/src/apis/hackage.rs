@@ -1,8 +1,6 @@
-use std::time::Duration;
-
 use axum::extract::{Path, Query};
 use badgelib::Badge;
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -14,7 +12,7 @@ struct Data {
   license: String,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_data(name: String) -> Res<Data> {
   let url = format!("https://hackage.haskell.org/package/{name}/{name}.cabal");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

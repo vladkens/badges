@@ -1,8 +1,6 @@
-use std::time::Duration;
-
 use axum::extract::{Path, Query};
 use badgelib::Badge;
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use crate::apis::{get_client, get_env};
@@ -14,7 +12,7 @@ struct VideoData {
   likes: u64,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_video_data(vid: String) -> Res<VideoData> {
   let key = get_env("YT_TOKEN")?;
   let url = "https://www.googleapis.com/youtube/v3/videos?part=statistics";
@@ -37,7 +35,7 @@ struct ChannelData {
   subs: u64,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_channel_data(cid: String) -> Res<ChannelData> {
   let var = if cid.starts_with("@") { "forUsername" } else { "id" };
   let cid = cid.trim_start_matches('@');

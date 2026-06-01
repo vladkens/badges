@@ -1,9 +1,7 @@
-use std::time::Duration;
-
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Period};
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -15,7 +13,7 @@ struct NpmData {
   license: String,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_data(name: String) -> Res<NpmData> {
   let url = format!("https://unpkg.com/{name}@latest/package.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -26,7 +24,7 @@ async fn get_data(name: String) -> Res<NpmData> {
   Ok(NpmData { version, license })
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_downloads(name: String, kind: Kind) -> Res<u64> {
   let url = "https://api.npmjs.org/downloads";
   let url = match kind {

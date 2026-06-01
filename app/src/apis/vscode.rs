@@ -1,8 +1,6 @@
-use std::time::Duration;
-
 use axum::extract::{Path, Query};
 use badgelib::Badge;
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -16,7 +14,7 @@ struct Data {
   downloads: u64,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_data(name: String) -> Res<Data> {
   let url = "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery";
   let dat = json!({

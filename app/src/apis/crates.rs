@@ -1,8 +1,6 @@
-use std::time::Duration;
-
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Color, Period};
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -18,7 +16,7 @@ struct Data {
   size: u64,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_data(name: String) -> Res<Data> {
   let url = format!("https://crates.io/api/v1/crates/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -44,7 +42,7 @@ async fn get_data(name: String) -> Res<Data> {
   Ok(Data { version, license, dlt, dlq, msrv, size })
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_docs(name: String) -> Res<bool> {
   let url = format!("https://docs.rs/crate/{name}/latest/status.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -52,7 +50,7 @@ async fn get_docs(name: String) -> Res<bool> {
   Ok(dat["doc_status"].as_bool().unwrap_or(false))
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_deps_status(name: String) -> Res<(String, Color)> {
   let url = format!("https://deps.rs/crate/{name}/latest/status.svg?style=flat-square");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

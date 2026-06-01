@@ -1,8 +1,6 @@
-use std::time::Duration;
-
 use axum::extract::{Path, Query};
 use badgelib::Badge;
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -16,7 +14,7 @@ struct Data {
   score_count: u64,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_data(name: String) -> Res<Data> {
   // https://github.com/simov/chrome-webstore/blob/master/client.js
   let url = "https://chrome.google.com/webstore/ajax/detail";

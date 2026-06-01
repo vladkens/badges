@@ -1,8 +1,6 @@
-use std::time::Duration;
-
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Period};
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -19,7 +17,7 @@ struct Score {
   license: String,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_data(name: String) -> Res<Data> {
   let url = format!("https://pub.dev/api/packages/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -30,7 +28,7 @@ async fn get_data(name: String) -> Res<Data> {
   Ok(Data { version })
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_score(name: String) -> Res<Score> {
   let url = format!("https://pub.dev/api/packages/{name}/score");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

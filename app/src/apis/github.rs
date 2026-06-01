@@ -1,9 +1,7 @@
-use std::time::Duration;
-
 use anyhow::anyhow;
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Period};
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -20,7 +18,7 @@ struct Base {
   lang: String,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_data(name: String) -> Res<Base> {
   let url = format!("https://api.github.com/repos/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -42,7 +40,7 @@ struct Release {
   dlt: u64,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_release(name: String) -> Res<Release> {
   let url = format!("https://api.github.com/repos/{name}/releases/latest");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -57,7 +55,7 @@ async fn get_release(name: String) -> Res<Release> {
   Ok(Release { version, dlt })
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn last_commit(name: String) -> Res<DateTime<Utc>> {
   let url = format!("https://api.github.com/repos/{name}/commits");
   let req = get_client().get(&url).query(&[("per_page", "1")]);
@@ -78,7 +76,7 @@ struct LangData {
   total: u64,
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_lang(name: String) -> Res<LangData> {
   let url = format!("https://api.github.com/repos/{name}/languages");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -101,7 +99,7 @@ async fn get_lang(name: String) -> Res<LangData> {
   Ok(LangData { top_lang, top_percent, count, total })
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_contributors(name: String) -> Res<u64> {
   let url = format!("https://api.github.com/repos/{name}/contributors");
   let req = get_client().get(&url).query(&[("page", "1"), ("per_page", "1")]);

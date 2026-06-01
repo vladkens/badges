@@ -1,9 +1,8 @@
 use std::str;
-use std::time::Duration;
 
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Period};
-use cached::proc_macro::cached;
+use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
@@ -15,7 +14,7 @@ struct Data {
   dlt: u64, // total downloads
 }
 
-#[cached(time = 60, result = true)]
+#[cached(ttl = 60, result = true)]
 async fn get_dl(name: String) -> Res<Data> {
   let name = name.to_lowercase();
   let url = format!("https://azuresearch-usnc.nuget.org/query?q=packageid:{name}&prerelease=true");

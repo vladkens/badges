@@ -1,5 +1,4 @@
-*
-!Cargo.toml
-!Cargo.lock
-!app/
-!badgelib/
+.env
+.git
+**/.DS_Store
+target
