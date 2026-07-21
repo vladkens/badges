@@ -16,11 +16,11 @@ axum = ["dep:axum"]
 [dependencies]
 axum = { version = ">=0.8.0", optional = true }
 base64 = "0.22.1"
-chrono = { version = "0.4.44", features = ["serde"] }
+chrono = { version = "0.4.45", features = ["serde"] }
 maud = { version = "0.27.0" }
-phf = { version = "0.13.1", features = ["macros"] }
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.150"
+phf = { version = "0.14.0", features = ["macros"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
 
 [build-dependencies]
 rayon = "1.12.0"

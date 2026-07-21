@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use super::get_client;
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
 #[derive(Debug, Clone)]
 struct Data {
@@ -14,8 +14,8 @@ struct Data {
   downloads: u64,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_data(name: String) -> Res<Data> {
+#[cached(ttl = 60)]
+async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery";
   let dat = json!({
     "filters": [{ "criteria": [{ "filterType": 7, "value": name }] }],

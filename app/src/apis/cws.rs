@@ -4,7 +4,7 @@ use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
 #[derive(Debug, Clone)]
 struct Data {
@@ -14,8 +14,8 @@ struct Data {
   score_count: u64,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_data(name: String) -> Res<Data> {
+#[cached(ttl = 60)]
+async fn get_data(name: String) -> anyhow::Result<Data> {
   // https://github.com/simov/chrome-webstore/blob/master/client.js
   let url = "https://chrome.google.com/webstore/ajax/detail";
   let opt = &[("id", name.as_str()), ("hl", "en"), ("pv", "20210820")];

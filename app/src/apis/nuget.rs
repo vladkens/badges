@@ -6,7 +6,7 @@ use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
 #[derive(Debug, Clone)]
 struct Data {
@@ -14,8 +14,8 @@ struct Data {
   dlt: u64, // total downloads
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_dl(name: String) -> Res<Data> {
+#[cached(ttl = 60)]
+async fn get_dl(name: String) -> anyhow::Result<Data> {
   let name = name.to_lowercase();
   let url = format!("https://azuresearch-usnc.nuget.org/query?q=packageid:{name}&prerelease=true");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

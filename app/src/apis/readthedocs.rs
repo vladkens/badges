@@ -4,10 +4,10 @@ use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
-#[cached(ttl = 60, result = true)]
-async fn get_docs(name: String) -> Res<bool> {
+#[cached(ttl = 60)]
+async fn get_docs(name: String) -> anyhow::Result<bool> {
   // https://readthedocs.org/api/v3/projects/{}/builds/
   let url = format!("https://readthedocs.org/projects/{}/badge/", name);
   let rep = get_client().get(&url).send().await?.error_for_status()?;

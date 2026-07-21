@@ -4,7 +4,7 @@ use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
 #[derive(Debug, Clone)]
 struct Data {
@@ -17,8 +17,8 @@ struct Score {
   license: String,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_data(name: String) -> Res<Data> {
+#[cached(ttl = 60)]
+async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://pub.dev/api/packages/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -28,8 +28,8 @@ async fn get_data(name: String) -> Res<Data> {
   Ok(Data { version })
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_score(name: String) -> Res<Score> {
+#[cached(ttl = 60)]
+async fn get_score(name: String) -> anyhow::Result<Score> {
   let url = format!("https://pub.dev/api/packages/{name}/score");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;

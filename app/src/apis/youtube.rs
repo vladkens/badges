@@ -4,7 +4,7 @@ use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use crate::apis::{get_client, get_env};
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
 #[derive(Debug, Clone)]
 struct VideoData {
@@ -12,8 +12,8 @@ struct VideoData {
   likes: u64,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_video_data(vid: String) -> Res<VideoData> {
+#[cached(ttl = 60)]
+async fn get_video_data(vid: String) -> anyhow::Result<VideoData> {
   let key = get_env("YT_TOKEN")?;
   let url = "https://www.googleapis.com/youtube/v3/videos?part=statistics";
   let req = get_client().get(url).query(&[("key", &key), ("id", &vid)]);
@@ -35,8 +35,8 @@ struct ChannelData {
   subs: u64,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_channel_data(cid: String) -> Res<ChannelData> {
+#[cached(ttl = 60)]
+async fn get_channel_data(cid: String) -> anyhow::Result<ChannelData> {
   let var = if cid.starts_with("@") { "forUsername" } else { "id" };
   let cid = cid.trim_start_matches('@');
 

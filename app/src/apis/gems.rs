@@ -5,7 +5,7 @@ use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
 #[derive(Debug, Clone)]
 struct GemData {
@@ -15,8 +15,8 @@ struct GemData {
   ruby_ver: String,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_data(name: String) -> Res<GemData> {
+#[cached(ttl = 60)]
+async fn get_data(name: String) -> anyhow::Result<GemData> {
   // let url = format!("https://rubygems.org/api/v1/gems/{name}.json");
   let url = format!("https://rubygems.org/api/v1/versions/{name}.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

@@ -4,7 +4,7 @@ use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
 #[derive(Debug, Clone)]
 struct Data {
@@ -13,8 +13,8 @@ struct Data {
   platforms: Vec<String>,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_data(name: String) -> Res<Data> {
+#[cached(ttl = 60)]
+async fn get_data(name: String) -> anyhow::Result<Data> {
   // also: https://metrics.cocoapods.org/api/v1/pods/SwiftyJSON
   let url = format!("https://trunk.cocoapods.org/api/v1/pods/{name}/specs/latest");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

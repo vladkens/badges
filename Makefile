@@ -27,6 +27,7 @@ update:
 	git submodule foreach 'git fetch --tags && git checkout $$(git describe --tags $$(git rev-list --tags --max-count=1))'
 	rm -rf badgelib/src/_icons.rs badgelib/src/_width.rs
 	cargo upgrade -i
+	cargo check -p badgelib --all-features --locked
 
 deploy:
 	fly deploy

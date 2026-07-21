@@ -6,7 +6,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
 #[derive(Debug, Clone)]
 struct Base {
@@ -18,8 +18,8 @@ struct Base {
   lang: String,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_data(name: String) -> Res<Base> {
+#[cached(ttl = 60)]
+async fn get_data(name: String) -> anyhow::Result<Base> {
   let url = format!("https://api.github.com/repos/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -40,8 +40,8 @@ struct Release {
   dlt: u64,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_release(name: String) -> Res<Release> {
+#[cached(ttl = 60)]
+async fn get_release(name: String) -> anyhow::Result<Release> {
   let url = format!("https://api.github.com/repos/{name}/releases/latest");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -55,8 +55,8 @@ async fn get_release(name: String) -> Res<Release> {
   Ok(Release { version, dlt })
 }
 
-#[cached(ttl = 60, result = true)]
-async fn last_commit(name: String) -> Res<DateTime<Utc>> {
+#[cached(ttl = 60)]
+async fn last_commit(name: String) -> anyhow::Result<DateTime<Utc>> {
   let url = format!("https://api.github.com/repos/{name}/commits");
   let req = get_client().get(&url).query(&[("per_page", "1")]);
   let rep = req.send().await?.error_for_status()?;
@@ -76,8 +76,8 @@ struct LangData {
   total: u64,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_lang(name: String) -> Res<LangData> {
+#[cached(ttl = 60)]
+async fn get_lang(name: String) -> anyhow::Result<LangData> {
   let url = format!("https://api.github.com/repos/{name}/languages");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -99,8 +99,8 @@ async fn get_lang(name: String) -> Res<LangData> {
   Ok(LangData { top_lang, top_percent, count, total })
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_contributors(name: String) -> Res<u64> {
+#[cached(ttl = 60)]
+async fn get_contributors(name: String) -> anyhow::Result<u64> {
   let url = format!("https://api.github.com/repos/{name}/contributors");
   let req = get_client().get(&url).query(&[("page", "1"), ("per_page", "1")]);
   let rep = req.send().await?.error_for_status()?;

@@ -4,7 +4,7 @@ use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
 #[derive(Debug, Deserialize, Serialize, strum::Display, Hash, Clone, PartialEq, Eq)]
 pub(crate) enum Service {
@@ -16,8 +16,8 @@ pub(crate) enum Service {
   Bitbucket,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_coverage(service: Service, name: String) -> Res<u64> {
+#[cached(ttl = 60)]
+async fn get_coverage(service: Service, name: String) -> anyhow::Result<u64> {
   let url = format!("https://codecov.io/{service}/{name}/graph/badge.txt");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.text().await?;

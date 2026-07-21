@@ -4,7 +4,7 @@ use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
 #[derive(Debug, Clone)]
 struct Data {
@@ -12,8 +12,8 @@ struct Data {
   license: String,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_data(name: String) -> Res<Data> {
+#[cached(ttl = 60)]
+async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://hackage.haskell.org/package/{name}/{name}.cabal");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.text().await?;

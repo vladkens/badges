@@ -14,8 +14,8 @@ struct Data {
   automated: bool,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_data(name: String) -> Res<Data> {
+#[cached(ttl = 60)]
+async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://hub.docker.com/v2/repositories/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;

@@ -4,7 +4,7 @@ use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
-use crate::server::{BadgeRep, Res};
+use crate::server::BadgeRep;
 
 #[derive(Debug, Clone)]
 struct Data {
@@ -16,8 +16,8 @@ struct Data {
   size: u64,
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_data(name: String) -> Res<Data> {
+#[cached(ttl = 60)]
+async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://crates.io/api/v1/crates/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
@@ -42,16 +42,16 @@ async fn get_data(name: String) -> Res<Data> {
   Ok(Data { version, license, dlt, dlq, msrv, size })
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_docs(name: String) -> Res<bool> {
+#[cached(ttl = 60)]
+async fn get_docs(name: String) -> anyhow::Result<bool> {
   let url = format!("https://docs.rs/crate/{name}/latest/status.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
   Ok(dat["doc_status"].as_bool().unwrap_or(false))
 }
 
-#[cached(ttl = 60, result = true)]
-async fn get_deps_status(name: String) -> Res<(String, Color)> {
+#[cached(ttl = 60)]
+async fn get_deps_status(name: String) -> anyhow::Result<(String, Color)> {
   let url = format!("https://deps.rs/crate/{name}/latest/status.svg?style=flat-square");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
 
