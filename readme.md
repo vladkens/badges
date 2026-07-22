@@ -73,7 +73,23 @@ Replace `{label}`, `{message}`, and `{color}` with your desired text and color c
 **Or self-host your badge service:**
 
 ```sh
-docker run -d -p 8080:80 ghcr.io/vladkens/badges:latest
+docker run -d -p 8080:8080 ghcr.io/vladkens/badges:main
+```
+
+### GitHub API Authentication
+
+GitHub badges work without authentication, but a token increases the API rate limit. Create a [fine-grained personal access token](https://github.com/settings/personal-access-tokens/new) and leave additional permissions disabled—the service only reads public data. Pass one or more comma-separated tokens through `GH_TOKENS`:
+
+```dotenv
+GH_TOKENS=github_pat_TOKEN_1,github_pat_TOKEN_2
+```
+
+For Docker:
+
+```sh
+docker run -d -p 8080:8080 \
+  -e GH_TOKENS='github_pat_TOKEN_1,github_pat_TOKEN_2' \
+  ghcr.io/vladkens/badges:main
 ```
 
 ## Live Integrations

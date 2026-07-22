@@ -162,16 +162,6 @@ fn layout(title: Option<&str>, node: Markup) -> Markup {
     footer class="text-center" {
       hr {}
 
-      div class="flex-row items-center" style="justify-content: center; gap: 16px; padding-bottom: 10px" {
-        a target="_blank" href="https://startupfa.me/s/badgesws?utm_source=badges.ws" {
-          img src="https://startupfa.me/badges/featured-badge.webp" alt="Featured on Startup Fame" width="171" height="54" {}
-        }
-
-        a target="_blank" href="https://twelve.tools?utm_source=badges.ws" {
-          img src="https://twelve.tools/badge0-light.svg" alt="Featured on Twelve Tools" width="200" height="54" {}
-        }
-      }
-
       small {
         "© " (chrono::Local::now().year()) " · Made by "
         a target="_blank" href="https://vladkens.cc" { "Badges.ws" } " team."
@@ -1075,6 +1065,9 @@ pub async fn privacy() -> AnyRep<impl IntoResponse> {
 }
 
 pub async fn index() -> AnyRep<impl IntoResponse> {
+  let current_year = chrono::Utc::now().year();
+  let previous_year = current_year - 1;
+
   #[rustfmt::skip]
   let icons = vec![
     "git", "github", "gitlab", "gitea", "bitbucket", "githubsponsors",
@@ -1171,9 +1164,9 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
       ]))
 
       (render_tbox("Maintenance", vec![
-        ("/maintenance/yes/2025", ""),
-        ("/maintenance/no/2025", ""),
-        ("/maintenance/yes/2024", ""),
+        (format!("/maintenance/yes/{current_year}"), String::new()),
+        (format!("/maintenance/no/{current_year}"), String::new()),
+        (format!("/maintenance/yes/{previous_year}"), String::new()),
       ]))
     }
 

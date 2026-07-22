@@ -1,12 +1,148 @@
-use anyhow::anyhow;
+use std::collections::HashSet;
+use std::sync::OnceLock;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::time::{SystemTime, UNIX_EPOCH};
+
+use anyhow::{anyhow, bail};
 use axum::extract::{Path, Query};
 use badgelib::{Badge, Period};
 use cached::macros::cached;
 use chrono::{DateTime, Utc};
+use reqwest::header::HeaderMap;
+use reqwest::{Response, StatusCode};
 use serde::{Deserialize, Serialize};
 
 use super::get_client;
 use crate::server::BadgeRep;
+
+struct GitHubToken {
+  value: String,
+  blocked_until: AtomicU64,
+}
+
+struct GitHubClient {
+  client: reqwest::Client,
+  tokens: Vec<GitHubToken>,
+}
+
+impl GitHubClient {
+  fn from_env() -> Self {
+    let value = std::env::var("GH_TOKENS").unwrap_or_default();
+    Self::new(parse_tokens(&value))
+  }
+
+  fn new(tokens: Vec<String>) -> Self {
+    let tokens = tokens
+      .into_iter()
+      .map(|value| GitHubToken { value, blocked_until: AtomicU64::new(0) })
+      .collect();
+
+    Self { client: get_client(), tokens }
+  }
+
+  fn available_tokens(&self, now: u64) -> Vec<usize> {
+    let mut tokens = self
+      .tokens
+      .iter()
+      .enumerate()
+      .filter_map(|(index, token)| {
+        (token.blocked_until.load(Ordering::Relaxed) <= now).then_some(index)
+      })
+      .collect::<Vec<_>>();
+    fastrand::shuffle(&mut tokens);
+    tokens
+  }
+
+  async fn get(&self, url: &str, query: &[(&str, &str)]) -> anyhow::Result<Response> {
+    if self.tokens.is_empty() {
+      return Ok(self.client.get(url).query(query).send().await?.error_for_status()?);
+    }
+
+    let now = unix_time();
+    let tokens = self.available_tokens(now);
+    if tokens.is_empty() {
+      let reset = self
+        .tokens
+        .iter()
+        .map(|token| token.blocked_until.load(Ordering::Relaxed))
+        .min()
+        .unwrap_or(now);
+      if reset == u64::MAX {
+        bail!("all github tokens were rejected");
+      }
+      bail!("all github tokens are rate limited until {reset}");
+    }
+
+    let mut last_rate_limit = None;
+    for index in tokens {
+      let token = &self.tokens[index];
+      let rep = self.client.get(url).query(query).bearer_auth(&token.value).send().await?;
+
+      if rep.status() == StatusCode::UNAUTHORIZED {
+        token.blocked_until.store(u64::MAX, Ordering::Relaxed);
+        tracing::warn!(token_index = index, "github token rejected");
+        continue;
+      }
+
+      if let Some(reset) = rate_limit_reset(rep.status(), rep.headers(), now) {
+        token.blocked_until.store(reset, Ordering::Relaxed);
+        tracing::warn!(token_index = index, reset_at = reset, "github token rate limited");
+        last_rate_limit = Some(rep);
+        continue;
+      }
+
+      return Ok(rep.error_for_status()?);
+    }
+
+    if let Some(rep) = last_rate_limit {
+      return Ok(rep.error_for_status()?);
+    }
+
+    bail!("all github tokens were rejected")
+  }
+}
+
+fn parse_tokens(value: &str) -> Vec<String> {
+  let mut seen = HashSet::new();
+  value
+    .split(|c: char| c == ',' || c.is_whitespace())
+    .filter(|token| !token.is_empty())
+    .filter(|token| seen.insert(*token))
+    .map(str::to_string)
+    .collect()
+}
+
+fn unix_time() -> u64 {
+  SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs()
+}
+
+fn rate_limit_reset(status: StatusCode, headers: &HeaderMap, now: u64) -> Option<u64> {
+  if status != StatusCode::FORBIDDEN && status != StatusCode::TOO_MANY_REQUESTS {
+    return None;
+  }
+
+  let remaining = headers.get("x-ratelimit-remaining")?.to_str().ok()?;
+  if remaining != "0" {
+    return None;
+  }
+
+  Some(
+    headers
+      .get("x-ratelimit-reset")
+      .and_then(|value| value.to_str().ok())
+      .and_then(|value| value.parse().ok())
+      .unwrap_or(now + 60),
+  )
+}
+
+async fn github_get(url: &str) -> anyhow::Result<Response> {
+  github_get_with_query(url, &[]).await
+}
+
+async fn github_get_with_query(url: &str, query: &[(&str, &str)]) -> anyhow::Result<Response> {
+  static CLIENT: OnceLock<GitHubClient> = OnceLock::new();
+  CLIENT.get_or_init(GitHubClient::from_env).get(url, query).await
+}
 
 #[derive(Debug, Clone)]
 struct Base {
@@ -21,7 +157,7 @@ struct Base {
 #[cached(ttl = 60)]
 async fn get_data(name: String) -> anyhow::Result<Base> {
   let url = format!("https://api.github.com/repos/{name}");
-  let rep = get_client().get(&url).send().await?.error_for_status()?;
+  let rep = github_get(&url).await?;
   let dat = rep.json::<serde_json::Value>().await?;
 
   let license = dat["license"]["spdx_id"].as_str().unwrap_or("unknown").to_string();
@@ -43,7 +179,7 @@ struct Release {
 #[cached(ttl = 60)]
 async fn get_release(name: String) -> anyhow::Result<Release> {
   let url = format!("https://api.github.com/repos/{name}/releases/latest");
-  let rep = get_client().get(&url).send().await?.error_for_status()?;
+  let rep = github_get(&url).await?;
   let dat = rep.json::<serde_json::Value>().await?;
 
   let version = dat["tag_name"].as_str().unwrap_or("unknown").to_string();
@@ -58,8 +194,7 @@ async fn get_release(name: String) -> anyhow::Result<Release> {
 #[cached(ttl = 60)]
 async fn last_commit(name: String) -> anyhow::Result<DateTime<Utc>> {
   let url = format!("https://api.github.com/repos/{name}/commits");
-  let req = get_client().get(&url).query(&[("per_page", "1")]);
-  let rep = req.send().await?.error_for_status()?;
+  let rep = github_get_with_query(&url, &[("per_page", "1")]).await?;
   let dat = rep.json::<serde_json::Value>().await?;
 
   dat[0]["commit"]["author"]["date"]
@@ -79,7 +214,7 @@ struct LangData {
 #[cached(ttl = 60)]
 async fn get_lang(name: String) -> anyhow::Result<LangData> {
   let url = format!("https://api.github.com/repos/{name}/languages");
-  let rep = get_client().get(&url).send().await?.error_for_status()?;
+  let rep = github_get(&url).await?;
   let dat = rep.json::<serde_json::Value>().await?;
 
   let mut langs: Vec<(String, u64)> = dat
@@ -102,8 +237,7 @@ async fn get_lang(name: String) -> anyhow::Result<LangData> {
 #[cached(ttl = 60)]
 async fn get_contributors(name: String) -> anyhow::Result<u64> {
   let url = format!("https://api.github.com/repos/{name}/contributors");
-  let req = get_client().get(&url).query(&[("page", "1"), ("per_page", "1")]);
-  let rep = req.send().await?.error_for_status()?;
+  let rep = github_get_with_query(&url, &[("page", "1"), ("per_page", "1")]).await?;
 
   let link = rep.headers().get("Link").and_then(|x| x.to_str().ok()).unwrap_or("");
   let last: u64 = link
@@ -206,4 +340,53 @@ pub async fn workflow_handler(
 
   let status = dat.contains(">passing<");
   Ok(badge.for_ci_status("build", status))
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn parses_tokens_from_spaces_commas_and_lines() {
+    let tokens = parse_tokens("one two,three\nfour\t five,one");
+    assert_eq!(tokens, ["one", "two", "three", "four", "five"]);
+  }
+
+  #[test]
+  fn recognizes_primary_rate_limit() {
+    let mut headers = HeaderMap::new();
+    headers.insert("x-ratelimit-remaining", "0".parse().unwrap());
+    headers.insert("x-ratelimit-reset", "200".parse().unwrap());
+
+    assert_eq!(rate_limit_reset(StatusCode::FORBIDDEN, &headers, 100), Some(200));
+    assert_eq!(rate_limit_reset(StatusCode::INTERNAL_SERVER_ERROR, &headers, 100), None);
+  }
+
+  #[test]
+  fn ignores_non_rate_limit_forbidden_response() {
+    let mut headers = HeaderMap::new();
+    headers.insert("x-ratelimit-remaining", "42".parse().unwrap());
+
+    assert_eq!(rate_limit_reset(StatusCode::FORBIDDEN, &headers, 100), None);
+  }
+
+  #[test]
+  fn excludes_rate_limited_tokens() {
+    let client = GitHubClient::new(vec!["one".into(), "two".into(), "three".into()]);
+    client.tokens[1].blocked_until.store(200, Ordering::Relaxed);
+
+    let tokens = client.available_tokens(100);
+    assert_eq!(tokens.len(), 2);
+    assert!(tokens.contains(&0));
+    assert!(tokens.contains(&2));
+  }
+
+  #[test]
+  fn restores_tokens_after_reset() {
+    let client = GitHubClient::new(vec!["one".into(), "two".into()]);
+    client.tokens[0].blocked_until.store(100, Ordering::Relaxed);
+
+    let tokens = client.available_tokens(100);
+    assert_eq!(tokens.len(), 2);
+  }
 }
