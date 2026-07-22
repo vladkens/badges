@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1-labs
+# syntax=docker/dockerfile:1
 
 FROM --platform=$BUILDPLATFORM rust:alpine AS builder
 RUN apk add --no-cache musl-dev openssl-dev zig && \
@@ -6,8 +6,7 @@ RUN apk add --no-cache musl-dev openssl-dev zig && \
   cargo install cargo-zigbuild
 
 WORKDIR /app
-COPY Cargo.toml Cargo.lock ./
-COPY --parents app badgelib ./
+COPY --parents Cargo.toml Cargo.lock src assets markdown ./
 RUN --mount=type=cache,target=/usr/local/cargo/registry --mount=type=cache,target=/app/target \
   cargo zigbuild -r --target x86_64-unknown-linux-musl --target aarch64-unknown-linux-musl && \
   mkdir -p /out/linux/ && \

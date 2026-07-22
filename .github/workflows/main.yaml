@@ -1,10 +1,9 @@
-name: ci
+name: main
 
 on:
   push:
     branches: [main]
     tags: ["v*"]
-  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.sha }}
@@ -16,36 +15,28 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v7
 
       - uses: actions/cache@v5
         with:
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
           path: |
-            ~/.cargo/bin/
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-            target/
 
       - run: rustup update --no-self-update stable && rustup default stable
       - run: make check
       - run: make test
 
   docker:
-    if: ${{ github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
     needs: test
     permissions:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v7
 
       - uses: docker/setup-qemu-action@v4
       - uses: docker/setup-buildx-action@v4
@@ -85,21 +76,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  publish:
-    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-
-      - run: rustup update --no-self-update stable && rustup default stable
-      - run: cargo publish --manifest-path badgelib/Cargo.toml --locked
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_TOKEN }}
