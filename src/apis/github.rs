@@ -5,7 +5,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{anyhow, bail};
 use axum::extract::{Path, Query};
-use badgelib::{Badge, Period};
+use badgelib::{Badge, Color, Period};
 use cached::macros::cached;
 use chrono::{DateTime, Utc};
 use reqwest::header::HeaderMap;
@@ -176,10 +176,30 @@ struct Release {
   dlt: u64,
 }
 
+#[derive(Debug, Clone)]
+enum ReleaseState {
+  Published(Release),
+  Missing,
+  RepositoryMissing,
+}
+
 #[cached(ttl = 60)]
-async fn get_release(name: String) -> anyhow::Result<Release> {
+async fn get_release(name: String) -> anyhow::Result<ReleaseState> {
   let url = format!("https://api.github.com/repos/{name}/releases/latest");
-  let rep = github_get(&url).await?;
+  let rep = match github_get(&url).await {
+    Ok(rep) => rep,
+    Err(err) if error_status(&err) == Some(StatusCode::NOT_FOUND) => {
+      let repo_url = format!("https://api.github.com/repos/{name}");
+      return match github_get(&repo_url).await {
+        Ok(_) => Ok(ReleaseState::Missing),
+        Err(err) if error_status(&err) == Some(StatusCode::NOT_FOUND) => {
+          Ok(ReleaseState::RepositoryMissing)
+        }
+        Err(err) => Err(err),
+      };
+    }
+    Err(err) => return Err(err),
+  };
   let dat = rep.json::<serde_json::Value>().await?;
 
   let version = dat["tag_name"].as_str().unwrap_or("unknown").to_string();
@@ -188,7 +208,11 @@ async fn get_release(name: String) -> anyhow::Result<Release> {
     .map(|p| p.iter().filter_map(|x| x["download_count"].as_u64()).sum::<u64>())
     .unwrap_or(0);
 
-  Ok(Release { version, dlt })
+  Ok(ReleaseState::Published(Release { version, dlt }))
+}
+
+fn error_status(err: &anyhow::Error) -> Option<StatusCode> {
+  err.downcast_ref::<reqwest::Error>().and_then(reqwest::Error::status)
 }
 
 #[cached(ttl = 60)]
@@ -298,8 +322,28 @@ pub async fn handler(
   let name = format!("{user}/{repo}");
 
   match kind {
-    Kind::Release => Ok(badge.for_version("release", &get_release(name).await?.version)),
-    Kind::AssetsDl => Ok(badge.for_downloads(Period::Total, get_release(name).await?.dlt)),
+    kind @ (Kind::Release | Kind::AssetsDl) => {
+      let release = get_release(name).await?;
+      let badge = match (kind, release) {
+        (_, ReleaseState::RepositoryMissing) => {
+          badge.label("repo").value("not found").value_color(Color::Red)
+        }
+        (Kind::Release, ReleaseState::Published(release)) => {
+          badge.for_version("release", &release.version)
+        }
+        (Kind::Release, ReleaseState::Missing) => {
+          badge.for_version("release", "none").value_color(Color::Gray)
+        }
+        (Kind::AssetsDl, ReleaseState::Published(release)) => {
+          badge.for_downloads(Period::Total, release.dlt)
+        }
+        (Kind::AssetsDl, ReleaseState::Missing) => {
+          badge.for_downloads(Period::Total, 0).value("none").value_color(Color::Gray)
+        }
+        _ => unreachable!(),
+      };
+      Ok(badge)
+    }
     Kind::Contributors => Ok(badge.for_count("contributors", get_contributors(name).await?)),
     Kind::License | Kind::Stars | Kind::Forks | Kind::Watchers | Kind::RepoSize | Kind::Lang => {
       let rs = get_data(name).await?;
