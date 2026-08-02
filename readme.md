@@ -107,10 +107,11 @@ docker run -d -p 8080:8080 \
 
 ## Credits & Inspiration
 
+- Badge rendering is powered by [badgelib](https://github.com/vladkens/badgelib).
 - This project was inspired by [Shields.io](https://github.com/badges/shields) and [Badgen.net](https://github.com/badgen/badgen.net).
 - Icons are provided by the amazing [Simple Icons](https://simpleicons.org) project.
 - The font used for badge rendering is [DejaVu Sans](https://dejavu-fonts.github.io), an open-source font family designed for high-quality text rendering.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](/LICENSE) file for details.
+Distributed under the [MIT License](/LICENSE).
