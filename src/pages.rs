@@ -1163,6 +1163,11 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
         ("/badge/label__message-red", "Fixed badge with underscore"),
       ]))
 
+      (render_tbox("Presets", vec![
+        ("/handmade".to_string(), String::new()),
+        ("/vibecoded".to_string(), String::new()),
+      ]))
+
       (render_tbox("Maintenance", vec![
         (format!("/maintenance/yes/{current_year}"), String::new()),
         (format!("/maintenance/no/{current_year}"), String::new()),

@@ -21,6 +21,7 @@ pub(crate) mod npm;
 pub(crate) mod nuget;
 pub(crate) mod packagephobia;
 pub(crate) mod packagist;
+pub(crate) mod presets;
 pub(crate) mod puppetforge;
 pub(crate) mod pypi;
 pub(crate) mod readthedocs;
