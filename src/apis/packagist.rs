@@ -31,6 +31,10 @@ fn parse_versions(
   obj.collect::<Vec<_>>()
 }
 
+fn norm_min_ver(v: &str) -> String {
+  v.replace(">=", "≥").replace("<=", "≤")
+}
+
 #[cached(ttl = 60)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://packagist.org/packages/{name}.json");
@@ -94,8 +98,18 @@ pub async fn handler(
     Kind::DlWeek => Ok(badge.for_downloads(Period::Week, rs.dlw)),
     Kind::DlMonth => Ok(badge.for_downloads(Period::Month, rs.dlm)),
     Kind::DlTotal => Ok(badge.for_downloads(Period::Total, rs.dlt)),
-    Kind::PHP => Ok(badge.label("php").value(&rs.php_ver)),
+    Kind::PHP => Ok(badge.label("php").value(&norm_min_ver(&rs.php_ver))),
     Kind::Stars => Ok(badge.for_count("stars", rs.stars)),
     Kind::Dependents => Ok(badge.for_count("dependents", rs.dependents)),
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn normalizes_php_version_comparators() {
+    assert_eq!(norm_min_ver(">=8.1 <=8.4"), "≥8.1 ≤8.4");
   }
 }

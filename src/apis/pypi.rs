@@ -21,6 +21,24 @@ fn parse_version(v: &str) -> Vec<u32> {
   v.split('.').map(|part| part.parse::<u32>().unwrap_or(0)).collect()
 }
 
+fn get_python_versions(classifiers: &[&str], requires_python: Option<&str>) -> Vec<String> {
+  let mut pythons = classifiers
+    .iter()
+    .filter(|x| x.starts_with("Programming Language :: Python :: "))
+    .map(|x| x.replace("Programming Language :: Python :: ", ""))
+    .filter(|x| x.contains('.') && x.split('.').all(|part| part.parse::<u32>().is_ok()))
+    .collect::<Vec<_>>();
+
+  if pythons.is_empty()
+    && let Some(requires_python) = requires_python.filter(|x| !x.trim().is_empty())
+  {
+    pythons.push(requires_python.replace(">=", "≥").replace("<=", "≤"));
+  }
+
+  pythons.sort_by_key(|x| parse_version(x));
+  pythons
+}
+
 #[cached(ttl = 60)]
 async fn get_data(name: String) -> anyhow::Result<PyPiData> {
   // https://pypi.org/pypi?%3Aaction=list_classifiers
@@ -36,14 +54,7 @@ async fn get_data(name: String) -> anyhow::Result<PyPiData> {
     .map(|x| x.iter().filter_map(|x| x.as_str()).collect::<Vec<_>>())
     .unwrap_or_default();
 
-  let mut pythons = classifiers
-    .iter()
-    .filter(|x| x.starts_with("Programming Language :: Python :: "))
-    .map(|x| x.replace("Programming Language :: Python :: ", ""))
-    .filter(|x| !x.contains(" :: ")) // Drop with label, e.g.: "Python :: 3.X :: Label"
-    .collect::<Vec<String>>();
-
-  pythons.sort_by_key(|x| parse_version(x));
+  let pythons = get_python_versions(&classifiers, dat["info"]["requires_python"].as_str());
 
   let status = classifiers
     .iter()
@@ -74,28 +85,45 @@ async fn get_data(name: String) -> anyhow::Result<PyPiData> {
   Ok(PyPiData { version, license, pythons, wheel, status, implementation })
 }
 
-#[cached(ttl = 60)]
-async fn get_dl_granular(name: String) -> anyhow::Result<(u64, u64)> {
+#[cached(ttl = 3600)]
+async fn get_dl_granular(name: String) -> anyhow::Result<Option<(u64, u64)>> {
   // doc: https://pypistats.org/api/
   let url = format!("https://pypistats.org/api/packages/{}/recent", name);
-  let rep = get_client().get(&url).send().await?.error_for_status()?;
+  let rep = get_client().get(&url).send().await?;
+  if rep.status() == reqwest::StatusCode::NOT_FOUND {
+    get_data(name).await?;
+    return Ok(None);
+  }
+  let rep = rep.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
 
   let dlw = dat["data"]["last_week"].as_u64().unwrap_or(0);
   let dlm = dat["data"]["last_month"].as_u64().unwrap_or(0);
-  Ok((dlw, dlm))
+  Ok(Some((dlw, dlm)))
 }
 
-#[cached(ttl = 60)]
-async fn get_dl_total(name: String) -> anyhow::Result<u64> {
+#[cached(ttl = 3600)]
+async fn get_dl_total(name: String) -> anyhow::Result<Option<u64>> {
   let url = format!("https://pypistats.org/api/packages/{}/overall?mirrors=true", name);
-  let rep = get_client().get(&url).send().await?.error_for_status()?;
+  let rep = get_client().get(&url).send().await?;
+  if rep.status() == reqwest::StatusCode::NOT_FOUND {
+    get_data(name).await?;
+    return Ok(None);
+  }
+  let rep = rep.error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
 
   let dlt = dat["data"].as_array().ok_or(anyhow!("no data"))?;
   let dlt = dlt.iter().filter_map(|x| x["downloads"].as_u64());
   let dlt = dlt.sum::<u64>();
-  Ok(dlt)
+  Ok(Some(dlt))
+}
+
+fn download_badge(badge: Badge, period: Period, downloads: Option<u64>) -> Badge {
+  match downloads {
+    Some(downloads) => badge.for_downloads(period, downloads),
+    None => badge.for_downloads(period, 0).value("none").value_color(Color::Gray),
+  }
 }
 
 #[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display)]
@@ -125,12 +153,16 @@ pub async fn handler(
   Query(badge): Query<Badge>,
 ) -> BadgeRep {
   match kind {
-    Kind::DlTotal => return Ok(badge.for_downloads(Period::Total, get_dl_total(name).await?)),
+    Kind::DlTotal => {
+      return Ok(download_badge(badge, Period::Total, get_dl_total(name).await?));
+    }
     Kind::DlWeek => {
-      return Ok(badge.for_downloads(Period::Week, get_dl_granular(name).await?.0));
+      let downloads = get_dl_granular(name).await?.map(|downloads| downloads.0);
+      return Ok(download_badge(badge, Period::Week, downloads));
     }
     Kind::DlMonth => {
-      return Ok(badge.for_downloads(Period::Month, get_dl_granular(name).await?.1));
+      let downloads = get_dl_granular(name).await?.map(|downloads| downloads.1);
+      return Ok(download_badge(badge, Period::Month, downloads));
     }
     _ => {}
   }
@@ -165,5 +197,27 @@ pub async fn handler(
       Ok(badge.label("status").value(&rs.status).value_color(color))
     }
     Kind::Implementation => Ok(badge.label("implementation").value(&rs.implementation)),
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn falls_back_to_requires_python_without_version_classifiers() {
+    let classifiers = [
+      "Development Status :: 3 - Alpha",
+      "Programming Language :: Python :: 3",
+      "Programming Language :: Python :: 3 :: Only",
+    ];
+    assert_eq!(get_python_versions(&classifiers, Some(">=3.11")), ["≥3.11"]);
+  }
+
+  #[test]
+  fn prefers_version_classifiers_over_requires_python() {
+    let classifiers =
+      ["Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.11"];
+    assert_eq!(get_python_versions(&classifiers, Some(">=3.11")), ["3.11", "3.12"]);
   }
 }
