@@ -3,12 +3,12 @@
 tag=badges
 
 prepare:
-	cargo fmt
+	cargo +nightly fmt
 	cargo clippy --fix --all-targets --all-features --locked --allow-dirty --allow-staged -- -D warnings
 	cargo check --release --locked
 
 check:
-	cargo fmt --check
+	cargo +nightly fmt --check
 	cargo clippy --all-targets --all-features --locked -- -D warnings
 	cargo check --release --locked
 
