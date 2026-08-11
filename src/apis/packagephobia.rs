@@ -14,10 +14,15 @@ struct Data {
   install_color: Color,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl = 3600)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://packagephobia.com/v2/api.json?p={name}");
-  let rep = get_client().get(&url).send().await?.error_for_status()?;
+  let rep = get_client()
+    .get(&url)
+    .header("user-agent", "Mozilla/5.0 (compatible; Badges/1.0; +https://badges.ws)")
+    .send()
+    .await?
+    .error_for_status()?;
   let dat = rep.json::<serde_json::Value>().await?;
 
   let publish_pretty = dat["publish"]["pretty"].as_str().unwrap_or("unknown").to_string();

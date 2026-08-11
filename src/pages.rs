@@ -127,7 +127,7 @@ fn layout(title: Option<&str>, node: Markup) -> Markup {
     link rel="preconnect" href="https://cdn.jsdelivr.net" {}
     link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" {}
     script src="https://cdn.jsdelivr.net/npm/htmx.org@2/dist/htmx.min.js" {}
-    script defer src="https://tinylytics.app/embed/5SK2Zy9T5MG5pGdyEwTY.js" {}
+    script defer src="https://cloud.umami.is/script.js" data-website-id="185ce86b-a0f1-42a6-83ea-d9e0e502c9d6" {}
 
     link rel="stylesheet" href=(format!("/assets/main.css?{build}")) {}
   };
@@ -1170,8 +1170,8 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
 
       (render_tbox("Maintenance", vec![
         (format!("/maintenance/yes/{current_year}"), String::new()),
-        (format!("/maintenance/no/{current_year}"), String::new()),
         (format!("/maintenance/yes/{previous_year}"), String::new()),
+        (format!("/maintenance/no/{current_year}"), String::new()),
       ]))
     }
 
