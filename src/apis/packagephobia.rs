@@ -9,9 +9,21 @@ use crate::server::BadgeRep;
 #[derive(Debug, Clone)]
 struct Data {
   publish_pretty: String,
-  publish_color: Color,
+  publish_bytes: u64,
   install_pretty: String,
-  install_color: Color,
+  install_bytes: u64,
+}
+
+fn size_color(bytes: u64) -> Color {
+  match bytes {
+    ..102_400 => Color::Green,       // < 100 KiB
+    ..1_048_576 => Color::Lime,      // < 1 MiB
+    ..5_242_880 => Color::Blue,      // < 5 MiB
+    ..31_457_280 => Color::Yellow,   // < 30 MiB
+    ..104_857_600 => Color::Orange,  // < 100 MiB
+    ..524_288_000 => Color::Red,     // < 500 MiB
+    _ => Color::Hex("ec4899".into()), // >= 500 MiB
+  }
 }
 
 #[cached(ttl = 3600)]
@@ -26,14 +38,12 @@ async fn get_data(name: String) -> anyhow::Result<Data> {
   let dat = rep.json::<serde_json::Value>().await?;
 
   let publish_pretty = dat["publish"]["pretty"].as_str().unwrap_or("unknown").to_string();
-  let publish_color =
-    dat["publish"]["color"].as_str().and_then(|x| Color::try_from(x).ok()).unwrap_or_default();
+  let publish_bytes = dat["publish"]["bytes"].as_u64().unwrap_or_default();
 
   let install_pretty = dat["install"]["pretty"].as_str().unwrap_or("unknown").to_string();
-  let install_color =
-    dat["install"]["color"].as_str().and_then(|x| Color::try_from(x).ok()).unwrap_or_default();
+  let install_bytes = dat["install"]["bytes"].as_u64().unwrap_or_default();
 
-  Ok(Data { publish_pretty, publish_color, install_pretty, install_color })
+  Ok(Data { publish_pretty, publish_bytes, install_pretty, install_bytes })
 }
 
 #[derive(Debug, Deserialize, Serialize, strum::EnumIter, strum::Display)]
@@ -54,10 +64,10 @@ pub async fn handler(
 
   match kind {
     Kind::Publish => {
-      Ok(badge.label("publish size").value(&rs.publish_pretty).value_color(rs.publish_color))
+      Ok(badge.label("publish size").value(&rs.publish_pretty).value_color(size_color(rs.publish_bytes)))
     }
     Kind::Install => {
-      Ok(badge.label("install size").value(&rs.install_pretty).value_color(rs.install_color))
+      Ok(badge.label("install size").value(&rs.install_pretty).value_color(size_color(rs.install_bytes)))
     }
   }
 }
