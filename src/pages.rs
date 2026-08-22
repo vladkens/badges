@@ -87,7 +87,7 @@ fn layout(title: Option<&str>, node: Markup) -> Markup {
     Some(title) => format!("{title} · {DEFAULT_TITLE}"),
     None => format!("{DEFAULT_TITLE} · Elegant badges for your standout projects"),
   };
-  let descr = "Generate beautiful, fast and lightweight badges for your GitHub repos, documentation and projects. Supports npm, PyPI, GitHub and 15+ other platforms.";
+  let descr = "Generate beautiful, fast and lightweight badges for your GitHub repos, documentation and projects. Supports 25+ integrations including npm, PyPI, and GitHub.";
   let build = env!("CARGO_PKG_VERSION");
 
   let head = html! {
@@ -1084,11 +1084,14 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
     ("label", "Text shown on the left side"),
     ("labelColor", "Color for the left side"),
     ("value", "Text shown on the right side"),
-    ("valueColor", "Color for the right side"),
-    ("icon", "Name from Simple Icons library"),
-    ("iconColor", "Color for the icon"),
-    ("style", "Badge style: flat, flat-square"),
+    ("color", "Color for the right side"),
+    ("logo", "Name from Simple Icons library"),
+    ("logoColor", "Color for the logo"),
+    ("style", "Badge style: flat, flat-square, for-the-badge"),
     ("radius", "Border radius in pixels (0-12)"),
+    ("animation", "Animation: flow, shine, aurora"),
+    ("format", "Output format: svg, json"),
+    ("cache", "Cache lifetime in seconds"),
   ];
 
   let colors = [
@@ -1125,14 +1128,14 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
       (heading(3, "Icons"))
       p {
         "Icons can be added to any badge using the "
-        code { "icon" } " and " code { "iconColor" } " parameters. "
+        code { "logo" } " and " code { "logoColor" } " parameters. "
         "All available icons are provided by the "
         a href="https://simpleicons.org/" class="contrast" target="_blank" { "Simple Icons" }
         " project."
       }
       div class="flex-row gap-2 flex-wrap" {
         @for icon in icons {
-          img class="h20" src=(format!("/badge/?icon={icon}&value={icon}")) alt=(icon) {}
+          img class="h20" src=(format!("/badge/?logo={icon}&value={icon}")) alt=(icon) {}
         }
       }
     }
