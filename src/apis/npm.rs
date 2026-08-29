@@ -13,7 +13,7 @@ struct NpmData {
   license: String,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<NpmData> {
   let url = format!("https://unpkg.com/{name}@latest/package.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -24,7 +24,7 @@ async fn get_data(name: String) -> anyhow::Result<NpmData> {
   Ok(NpmData { version, license })
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_downloads(name: String, kind: Kind) -> anyhow::Result<u64> {
   let url = "https://api.npmjs.org/downloads";
   let url = match kind {

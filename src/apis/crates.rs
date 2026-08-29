@@ -16,7 +16,7 @@ struct Data {
   size: u64,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://crates.io/api/v1/crates/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -42,7 +42,7 @@ async fn get_data(name: String) -> anyhow::Result<Data> {
   Ok(Data { version, license, dlt, dlq, msrv, size })
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_docs(name: String) -> anyhow::Result<bool> {
   let url = format!("https://docs.rs/crate/{name}/latest/status.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -50,7 +50,7 @@ async fn get_docs(name: String) -> anyhow::Result<bool> {
   Ok(dat["doc_status"].as_bool().unwrap_or(false))
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_deps_status(name: String) -> anyhow::Result<(String, Color)> {
   let url = format!("https://deps.rs/crate/{name}/latest/status.svg?style=flat-square");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

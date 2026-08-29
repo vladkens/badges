@@ -13,7 +13,7 @@ struct Data {
   platforms: Vec<String>,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   // also: https://metrics.cocoapods.org/api/v1/pods/SwiftyJSON
   let url = format!("https://trunk.cocoapods.org/api/v1/pods/{name}/specs/latest");

@@ -14,7 +14,7 @@ struct Data {
   dlt: u64, // total downloads
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_dl(name: String) -> anyhow::Result<Data> {
   let name = name.to_lowercase();
   let url = format!("https://azuresearch-usnc.nuget.org/query?q=packageid:{name}&prerelease=true");

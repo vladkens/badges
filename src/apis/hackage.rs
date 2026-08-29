@@ -12,7 +12,7 @@ struct Data {
   license: String,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://hackage.haskell.org/package/{name}/{name}.cabal");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

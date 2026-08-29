@@ -35,7 +35,7 @@ fn norm_min_ver(v: &str) -> String {
   v.replace(">=", "≥").replace("<=", "≤")
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://packagist.org/packages/{name}.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

@@ -13,7 +13,7 @@ struct Data {
   dlt: u64,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   // also: https://cljdoc.org/badge/wing/wing
   let url = format!("https://clojars.org/api/artifacts/{name}");

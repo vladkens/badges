@@ -15,7 +15,7 @@ struct GemData {
   ruby_ver: String,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<GemData> {
   // let url = format!("https://rubygems.org/api/v1/gems/{name}.json");
   let url = format!("https://rubygems.org/api/v1/versions/{name}.json");

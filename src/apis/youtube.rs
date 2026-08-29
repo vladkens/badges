@@ -12,7 +12,7 @@ struct VideoData {
   likes: u64,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_video_data(vid: String) -> anyhow::Result<VideoData> {
   let key = get_env("YT_TOKEN")?;
   let url = "https://www.googleapis.com/youtube/v3/videos?part=statistics";
@@ -35,7 +35,7 @@ struct ChannelData {
   subs: u64,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_channel_data(cid: String) -> anyhow::Result<ChannelData> {
   let var = if cid.starts_with("@") { "forUsername" } else { "id" };
   let cid = cid.trim_start_matches('@');

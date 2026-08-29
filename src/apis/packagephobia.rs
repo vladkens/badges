@@ -16,17 +16,17 @@ struct Data {
 
 fn size_color(bytes: u64) -> Color {
   match bytes {
-    ..102_400 => Color::Green,       // < 100 KiB
-    ..1_048_576 => Color::Lime,      // < 1 MiB
-    ..5_242_880 => Color::Blue,      // < 5 MiB
-    ..31_457_280 => Color::Yellow,   // < 30 MiB
-    ..104_857_600 => Color::Orange,  // < 100 MiB
-    ..524_288_000 => Color::Red,     // < 500 MiB
-    _ => Color::Hex("ec4899".into()), // >= 500 MiB
+    ..102_400 => Color::Green,                // < 100 KiB
+    102_400..1_048_576 => Color::Lime,        // < 1 MiB
+    1_048_576..5_242_880 => Color::Blue,      // < 5 MiB
+    5_242_880..31_457_280 => Color::Yellow,   // < 30 MiB
+    31_457_280..104_857_600 => Color::Orange, // < 100 MiB
+    104_857_600..524_288_000 => Color::Red,   // < 500 MiB
+    _ => Color::Hex("ec4899".into()),         // >= 500 MiB
   }
 }
 
-#[cached(ttl = 3600)]
+#[cached(ttl_secs = 3600)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://packagephobia.com/v2/api.json?p={name}");
   let rep = get_client()
@@ -63,11 +63,17 @@ pub async fn handler(
   let rs = get_data(name).await?;
 
   match kind {
-    Kind::Publish => {
-      Ok(badge.label("publish size").value(&rs.publish_pretty).value_color(size_color(rs.publish_bytes)))
-    }
-    Kind::Install => {
-      Ok(badge.label("install size").value(&rs.install_pretty).value_color(size_color(rs.install_bytes)))
-    }
+    Kind::Publish => Ok(
+      badge
+        .label("publish size")
+        .value(&rs.publish_pretty)
+        .value_color(size_color(rs.publish_bytes)),
+    ),
+    Kind::Install => Ok(
+      badge
+        .label("install size")
+        .value(&rs.install_pretty)
+        .value_color(size_color(rs.install_bytes)),
+    ),
   }
 }

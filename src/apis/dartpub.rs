@@ -17,7 +17,7 @@ struct Score {
   license: String,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://pub.dev/api/packages/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -28,7 +28,7 @@ async fn get_data(name: String) -> anyhow::Result<Data> {
   Ok(Data { version })
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_score(name: String) -> anyhow::Result<Score> {
   let url = format!("https://pub.dev/api/packages/{name}/score");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

@@ -39,7 +39,7 @@ fn get_python_versions(classifiers: &[&str], requires_python: Option<&str>) -> V
   pythons
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<PyPiData> {
   // https://pypi.org/pypi?%3Aaction=list_classifiers
   let url = format!("https://pypi.org/pypi/{name}/json");
@@ -85,7 +85,7 @@ async fn get_data(name: String) -> anyhow::Result<PyPiData> {
   Ok(PyPiData { version, license, pythons, wheel, status, implementation })
 }
 
-#[cached(ttl = 3600)]
+#[cached(ttl_secs = 3600)]
 async fn get_dl_granular(name: String) -> anyhow::Result<Option<(u64, u64)>> {
   // doc: https://pypistats.org/api/
   let url = format!("https://pypistats.org/api/packages/{}/recent", name);
@@ -102,7 +102,7 @@ async fn get_dl_granular(name: String) -> anyhow::Result<Option<(u64, u64)>> {
   Ok(Some((dlw, dlm)))
 }
 
-#[cached(ttl = 3600)]
+#[cached(ttl_secs = 3600)]
 async fn get_dl_total(name: String) -> anyhow::Result<Option<u64>> {
   let url = format!("https://pypistats.org/api/packages/{}/overall?mirrors=true", name);
   let rep = get_client().get(&url).send().await?;

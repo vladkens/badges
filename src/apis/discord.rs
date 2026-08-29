@@ -12,7 +12,7 @@ pub enum Data {
   Message(String),
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = format!("https://discord.com/api/v6/guilds/{name}/widget.json");
   let rep = get_client().get(&url).send().await?;

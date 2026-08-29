@@ -45,7 +45,7 @@ fn parse_metric(raw: &str) -> u64 {
   (num.parse::<f64>().unwrap_or(0.0) * mult) as u64
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   // https://github.com/awesome-webextension/webextension-store-meta
   let url = format!("https://chromewebstore.google.com/detail/{name}?hl=en");

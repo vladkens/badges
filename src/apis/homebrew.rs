@@ -13,7 +13,7 @@ struct Data {
   dly: u64,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(chan: String, name: String) -> anyhow::Result<Data> {
   let url = format!("https://formulae.brew.sh/api/{chan}/{name}.json");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

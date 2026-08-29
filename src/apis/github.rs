@@ -154,7 +154,7 @@ struct Base {
   lang: String,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<Base> {
   let url = format!("https://api.github.com/repos/{name}");
   let rep = github_get(&url).await?;
@@ -183,7 +183,7 @@ enum ReleaseState {
   RepositoryMissing,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_release(name: String) -> anyhow::Result<ReleaseState> {
   let url = format!("https://api.github.com/repos/{name}/releases/latest");
   let rep = match github_get(&url).await {
@@ -215,7 +215,7 @@ fn error_status(err: &anyhow::Error) -> Option<StatusCode> {
   err.downcast_ref::<reqwest::Error>().and_then(reqwest::Error::status)
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn last_commit(name: String) -> anyhow::Result<DateTime<Utc>> {
   let url = format!("https://api.github.com/repos/{name}/commits");
   let rep = github_get_with_query(&url, &[("per_page", "1")]).await?;
@@ -235,7 +235,7 @@ struct LangData {
   total: u64,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_lang(name: String) -> anyhow::Result<LangData> {
   let url = format!("https://api.github.com/repos/{name}/languages");
   let rep = github_get(&url).await?;
@@ -258,7 +258,7 @@ async fn get_lang(name: String) -> anyhow::Result<LangData> {
   Ok(LangData { top_lang, top_percent, count, total })
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_contributors(name: String) -> anyhow::Result<u64> {
   let url = format!("https://api.github.com/repos/{name}/contributors");
   let rep = github_get_with_query(&url, &[("page", "1"), ("per_page", "1")]).await?;

@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use super::get_client;
 use crate::server::BadgeRep;
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_version(name: String) -> anyhow::Result<String> {
   let url = format!("https://plugins.jetbrains.com/api/plugins/{name}/updates");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -14,7 +14,7 @@ async fn get_version(name: String) -> anyhow::Result<String> {
   Ok(dat[0]["version"].as_str().unwrap_or("unknown").to_string())
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_dlt(name: String) -> anyhow::Result<u64> {
   let url = format!("https://plugins.jetbrains.com/api/plugins/{name}");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -22,7 +22,7 @@ async fn get_dlt(name: String) -> anyhow::Result<u64> {
   Ok(dat["downloads"].as_u64().unwrap_or(0))
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_score(name: String) -> anyhow::Result<f64> {
   let url = format!("https://plugins.jetbrains.com/api/plugins/{name}/rating");
   let rep = get_client().get(&url).send().await?.error_for_status()?;

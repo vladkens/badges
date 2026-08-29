@@ -14,7 +14,7 @@ struct Data {
   downloads: u64,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_data(name: String) -> anyhow::Result<Data> {
   let url = "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery";
   let dat = json!({

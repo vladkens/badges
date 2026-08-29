@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use super::get_client;
 use crate::server::BadgeRep;
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_docs(name: String) -> anyhow::Result<bool> {
   // https://readthedocs.org/api/v3/projects/{}/builds/
   let url = format!("https://readthedocs.org/projects/{}/badge/", name);

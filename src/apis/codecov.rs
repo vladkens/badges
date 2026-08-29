@@ -16,7 +16,7 @@ pub(crate) enum Service {
   Bitbucket,
 }
 
-#[cached(ttl = 60)]
+#[cached(ttl_secs = 60)]
 async fn get_coverage(service: Service, name: String) -> anyhow::Result<u64> {
   let url = format!("https://codecov.io/{service}/{name}/graph/badge.txt");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
