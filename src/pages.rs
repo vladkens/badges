@@ -1166,6 +1166,11 @@ pub async fn index() -> AnyRep<impl IntoResponse> {
         ("/badge/label__message-red", "Fixed badge with underscore"),
       ]))
 
+      (render_tbox("GitHub JSON", vec![(
+        "/github/json/badges/shields/master/package.json?query=name&label=package",
+        "Value from a GitHub JSON file",
+      )]))
+
       (render_tbox("Presets", vec![
         ("/handmade".to_string(), String::new()),
         ("/vibecoded".to_string(), String::new()),

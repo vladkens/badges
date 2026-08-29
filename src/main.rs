@@ -64,6 +64,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .route("/amo/{kind}/{name}", get(apis::amo::handler))
     .route("/cws/{kind}/{name}", get(apis::cws::handler))
     .route("/jetbrains/{kind}/{name}", get(apis::jetbrains::handler))
+    .route("/github/json/{user}/{repo}/{branch}/{*path}", get(apis::github::json_handler))
     .route("/github/{kind}/{user}/{repo}", get(apis::github::handler))
     .route("/github/workflow/{user}/{repo}/{name}", get(apis::github::workflow_handler))
     .route("/codecov/c/{service}/{user}/{repo}", get(apis::codecov::handler))

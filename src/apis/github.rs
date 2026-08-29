@@ -144,6 +144,29 @@ async fn github_get_with_query(url: &str, query: &[(&str, &str)]) -> anyhow::Res
   CLIENT.get_or_init(GitHubClient::from_env).get(url, query).await
 }
 
+#[cached(ttl_secs = 300)]
+async fn get_json(url: String) -> anyhow::Result<serde_json::Value> {
+  let rep = get_client().get(url).send().await?.error_for_status()?;
+  Ok(rep.json().await?)
+}
+
+fn get_json_value<'a>(data: &'a serde_json::Value, query: &str) -> Option<&'a serde_json::Value> {
+  let query = query.strip_prefix("$.").unwrap_or(query);
+  if query.is_empty() {
+    return None;
+  }
+
+  query.split('.').try_fold(data, |value, key| value.get(key))
+}
+
+fn get_json_text(value: &serde_json::Value) -> anyhow::Result<String> {
+  match value {
+    serde_json::Value::String(value) => Ok(value.clone()),
+    serde_json::Value::Number(_) | serde_json::Value::Bool(_) => Ok(value.to_string()),
+    _ => bail!("JSON value must be a string, number, or boolean"),
+  }
+}
+
 #[derive(Debug, Clone)]
 struct Base {
   license: String,
@@ -315,6 +338,63 @@ pub(crate) struct Params {
   repo: String,
 }
 
+#[derive(Clone, Copy, Default, Deserialize)]
+#[serde(rename_all = "lowercase")]
+enum JsonKind {
+  #[default]
+  Text,
+  Count,
+  Size,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct JsonPath {
+  user: String,
+  repo: String,
+  branch: String,
+  path: String,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct JsonQuery {
+  query: String,
+  label: Option<String>,
+  color: Option<Color>,
+  #[serde(default)]
+  kind: JsonKind,
+}
+
+pub async fn json_handler(
+  Path(JsonPath { user, repo, branch, path }): Path<JsonPath>,
+  Query(params): Query<JsonQuery>,
+  Query(badge): Query<Badge>,
+) -> BadgeRep {
+  let path = path.trim_start_matches('/');
+  let url = format!("https://raw.githubusercontent.com/{user}/{repo}/{branch}/{path}");
+  let data = get_json(url).await?;
+  let value = get_json_value(&data, &params.query)
+    .ok_or_else(|| anyhow!("JSON query not found: {}", params.query))?;
+  let label = params.label.as_deref().unwrap_or(&params.query);
+
+  let badge = match params.kind {
+    JsonKind::Text => badge.label(label).value(&get_json_text(value)?),
+    JsonKind::Count => badge.for_count(
+      label,
+      value.as_u64().ok_or_else(|| anyhow!("JSON value is not an unsigned integer"))?,
+    ),
+    JsonKind::Size => badge.for_size(
+      label,
+      value.as_u64().ok_or_else(|| anyhow!("JSON value is not an unsigned integer"))?,
+    ),
+  };
+  let badge = match params.color {
+    Some(color) => badge.value_color(color),
+    None => badge,
+  };
+
+  Ok(badge)
+}
+
 pub async fn handler(
   Path(Params { kind, user, repo }): Path<Params>,
   Query(badge): Query<Badge>,
@@ -432,5 +512,13 @@ mod tests {
 
     let tokens = client.available_tokens(100);
     assert_eq!(tokens.len(), 2);
+  }
+
+  #[test]
+  fn reads_json_query() {
+    let data = serde_json::json!({ "dataset": { "stories": 123 } });
+    assert_eq!(get_json_value(&data, "dataset.stories"), Some(&serde_json::json!(123)));
+    assert_eq!(get_json_value(&data, "$.dataset.stories"), Some(&serde_json::json!(123)));
+    assert_eq!(get_json_value(&data, "dataset.metrics"), None);
   }
 }

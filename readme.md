@@ -114,6 +114,14 @@ Replace `{label}`, `{message}`, and `{color}` with your desired text and color c
 | `format` | `svg` or `json` |
 | `cache` | Cache lifetime in seconds |
 
+### GitHub JSON
+
+Use `/github/json/{user}/{repo}/{branch}/{path}?query={field}` to render a value from a JSON file in a public GitHub repository. Dot-separated queries and the `$.field` form are supported. Set `kind=count` to format an integer count or `kind=size` to format a byte size.
+
+```text
+/github/json/vladkens/hn-timeseries/data/stats.json?query=stories&kind=count&label=stories
+```
+
 **Or self-host your badge service:**
 
 ```sh
