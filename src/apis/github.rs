@@ -144,7 +144,7 @@ async fn github_get_with_query(url: &str, query: &[(&str, &str)]) -> anyhow::Res
   CLIENT.get_or_init(GitHubClient::from_env).get(url, query).await
 }
 
-#[cached(ttl_secs = 300)]
+#[cached(ttl_secs = 60)] // keep small
 async fn get_json(url: String) -> anyhow::Result<serde_json::Value> {
   let rep = get_client().get(url).send().await?.error_for_status()?;
   Ok(rep.json().await?)

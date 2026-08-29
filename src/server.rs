@@ -119,7 +119,8 @@ fn rewrite_request_uri<B>(mut req: Request<B>) -> Request<B> {
   let mut qs = req.uri().query().unwrap_or_default().to_string();
 
   let has_ext = path.ends_with(".svg") || path.ends_with(".json");
-  if !path.starts_with("/assets/") && has_ext {
+  let has_source_path = path.starts_with("/github/json/");
+  if !path.starts_with("/assets/") && !has_source_path && has_ext {
     let ext = path.split('.').next_back().unwrap();
     path = path.trim_end_matches(&format!(".{}", ext));
     qs = if qs.is_empty() { format!("format={}", ext) } else { format!("{}&format={}", qs, ext) };
@@ -157,4 +158,30 @@ pub async fn run_server(app: axum::Router) -> Result<(), Box<dyn std::error::Err
   tracing::info!("listening on http://{}", addr);
   axum::serve(listener, app).with_graceful_shutdown(shutdown_signal()).await?;
   Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  use axum::body::Body;
+
+  use super::*;
+
+  #[test]
+  fn preserves_json_source_path() {
+    let req = Request::builder()
+      .uri("/github/json/user/repo/main/data.json?query=count")
+      .body(Body::empty())
+      .unwrap();
+    let req = rewrite_request_uri(req);
+
+    assert_eq!(req.uri(), "/github/json/user/repo/main/data.json?query=count");
+  }
+
+  #[test]
+  fn rewrites_badge_format_extension() {
+    let req = Request::builder().uri("/github/stars/user/repo.json").body(Body::empty()).unwrap();
+    let req = rewrite_request_uri(req);
+
+    assert_eq!(req.uri(), "/github/stars/user/repo?format=json");
+  }
 }
