@@ -1036,7 +1036,7 @@ pub async fn debug() -> AnyRep<impl IntoResponse> {
         @for item in items {
           tr {
             td { img style=(icls) src=(format!("https://img.shields.io{item}")) {} }
-            td { img style=(icls) src=(format!("{item}")) {} }
+            td { img style=(icls) src=(item) {} }
           }
         }
       }

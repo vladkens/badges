@@ -1,6 +1,4 @@
-.PHONY: prepare check test watch build update deploy docker-build docker-run bench
-
-tag=badges
+.PHONY: prepare check test build update clean
 
 prepare:
 	cargo +nightly fmt
@@ -15,27 +13,39 @@ check:
 test:
 	cargo test --all-features --locked
 
-watch:
-	watchexec -rc -e rs -- cargo run
-
 build:
 	cargo build --release --locked
 	ls -lh target/release/badges
 
 update:
-	cargo upgrade -i
+	cargo upgrade --incompatible
+	cargo update
 
-deploy:
+clean:
+	cargo clean
+
+# badges
+.PHONY: watch smoke deploy docker-build docker-run bench
+
+tag=badges
+
+watch: # run the server, restarting on .rs changes
+	watchexec -rc -e rs -- cargo run
+
+smoke: # check that prod badges still show real upstream values (BASE_URL to override)
+	uv run scripts/smoke.py
+
+deploy: # deploy to fly.io
 	fly deploy
 
-docker-build:
+docker-build: # build the docker image and print its size
 	docker build -t $(tag) .
 	docker images -q $(tag) | xargs docker inspect -f '{{.Size}}' | xargs numfmt --to=iec
 
-docker-run: docker-build
+docker-run: docker-build # run the docker image on port 8080
 	docker rm --force $(tag) || true
 	docker run -p 8080:8080 --name $(tag) $(tag)
 
-bench:
+bench: # load-test a local server with wrk
 	@# wrk -t4 -c400 -d30s http://localhost:8080/health
 	wrk -t4 -c400 -d30s 'http://localhost:8080/badge/?icon=github&label=GitHub&value=badges'

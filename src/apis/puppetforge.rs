@@ -1,5 +1,5 @@
 use axum::extract::{Path, Query};
-use badgelib::{Badge, Period};
+use badgelib::{Badge, Color, Period};
 use cached::macros::cached;
 use serde::{Deserialize, Serialize};
 
@@ -10,7 +10,7 @@ use crate::server::BadgeRep;
 struct Data {
   ver: String,
   dlt: u64,
-  score: u64,
+  score: Option<u64>,
 }
 
 #[cached(ttl_secs = 60)]
@@ -21,7 +21,8 @@ async fn get_data(name: String) -> anyhow::Result<Data> {
 
   let ver = dat["current_release"]["version"].as_str().unwrap_or("unknown").into();
   let dlt = dat["downloads"].as_u64().unwrap_or(0);
-  let score = dat["current_release"]["validation_score"].as_u64().unwrap_or_default();
+  // Forge no longer publishes validation_score for releases since 2026
+  let score = dat["current_release"]["validation_score"].as_u64();
 
   Ok(Data { ver, dlt, score })
 }
@@ -44,6 +45,9 @@ pub async fn handler(
   match kind {
     Kind::Version => Ok(badge.for_version("puppetforge", &rs.ver)),
     Kind::DlTotal => Ok(badge.for_downloads(Period::Total, rs.dlt)),
-    Kind::Score => Ok(badge.label("quality score").value(&format!("{}%", rs.score))),
+    Kind::Score => match rs.score {
+      Some(score) => Ok(badge.label("quality score").value(&format!("{score}%"))),
+      None => Ok(badge.label("quality score").value("n/a").value_color(Color::Gray)),
+    },
   }
 }

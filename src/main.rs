@@ -85,7 +85,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   // `{rest}` to capture single token, `{*rest}` to capture all tokens
   let compatibility = Router::new()
     .route("/readthedocs/{rest}", redirect!("/readthedocs/status/{rest}"))
-    .route("/discord/{rest}", redirect!("/discord/members/{rest}"))
+    .route("/discord/{rest}", redirect!("/discord/online/{rest}"))
     .route("/pypi/pyversions/{*rest}", redirect!("/pypi/python/{*rest}"))
     .route("/github/actions/workflow/status/{*rest}", redirect!("/github/workflow/{*rest}"))
     .route("/crates/d/{*rest}", redirect!("/crates/dt/{*rest}"))

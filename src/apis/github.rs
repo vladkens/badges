@@ -452,11 +452,15 @@ pub async fn handler(
   }
 }
 
+fn workflow_file(name: String) -> String {
+  if name.ends_with(".yml") || name.ends_with(".yaml") { name } else { format!("{name}.yml") }
+}
+
 pub async fn workflow_handler(
   Path((repo, user, workflow)): Path<(String, String, String)>,
   Query(badge): Query<Badge>,
 ) -> BadgeRep {
-  let workflow = if !workflow.ends_with(".yml") { format!("{workflow}.yml") } else { workflow };
+  let workflow = workflow_file(workflow);
 
   let url = format!("https://github.com/{repo}/{user}/actions/workflows/{workflow}/badge.svg");
   let rep = get_client().get(&url).send().await?.error_for_status()?;
@@ -520,5 +524,12 @@ mod tests {
     assert_eq!(get_json_value(&data, "dataset.stories"), Some(&serde_json::json!(123)));
     assert_eq!(get_json_value(&data, "$.dataset.stories"), Some(&serde_json::json!(123)));
     assert_eq!(get_json_value(&data, "dataset.metrics"), None);
+  }
+
+  #[test]
+  fn appends_yml_only_without_workflow_extension() {
+    assert_eq!(workflow_file("test".into()), "test.yml");
+    assert_eq!(workflow_file("ci.yml".into()), "ci.yml");
+    assert_eq!(workflow_file("main.yaml".into()), "main.yaml");
   }
 }

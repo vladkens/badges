@@ -21,8 +21,12 @@ async fn get_data(name: String) -> anyhow::Result<Data> {
   let dat = rep.json::<serde_json::Value>().await?;
 
   let version = dat["version"].as_str().unwrap_or("unknown").to_string();
-  let license = dat["license"]["type"].as_str().unwrap_or("unknown").to_string();
-  let platforms = dat["platforms"].as_object().unwrap().keys().map(|x| x.to_string()).collect();
+  // podspec license is either "MIT" or {"type": "MIT", ...}
+  let license = dat["license"].as_str().or(dat["license"]["type"].as_str());
+  let license = license.unwrap_or("unknown").to_string();
+  // podspec without platforms supports all of them
+  let platforms = dat["platforms"].as_object().map(|x| x.keys().cloned().collect());
+  let platforms = platforms.unwrap_or_else(|| vec!["all".to_string()]);
   // let runtime = dat["swift_version"].as_str().unwrap_or("unknown").to_string();
 
   Ok(Data { version, license, platforms })
